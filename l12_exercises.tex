@@ -1,0 +1,317 @@
+\documentclass{article}
+
+\usepackage{amsthm,amsfonts}
+\usepackage{mathpartir}
+\usepackage{mathtools}
+\usepackage{tikz-cd}
+\usepackage{hyperref,cleveref}
+\usepackage{color,soul}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+
+% \theoremstyle{theorem}
+\newtheorem{theorem}[definition]{Theorem}
+\newtheorem{lemma}[definition]{Lemma}
+\newtheorem{corollary}[definition]{Corollary}
+\newtheorem{problem}[definition]{Problem}
+\newtheorem{exercise}[definition]{Exercise}
+\newtheorem{example}[definition]{Example}
+
+\newenvironment{construction}{\begin{proof}[Construction]}{\end{proof}}
+
+
+
+\newcommand{\types}{\mathcal T}
+% \newcommand{\type}{\textsc{type}}
+\newcommand{\terms}{\mathcal S}
+% \newcommand{\contexts}{\mathcal C}
+% \newcommand{\context}{\textsc{ctx}}
+\newcommand{\T}{\mathbb T}
+\newcommand{\C}{\mathcal C}
+\newcommand{\D}{\mathcal D}
+\newcommand{\Set}{{\mathcal S}et}
+\newcommand{\syncat}[1]{\C [#1]}
+% \newcommand{\defeq}{\coloneqq}
+% \newcommand{\interp}[1]{\lceil #1 \rceil}
+\newcommand{\seq}{\doteq}
+% \newcommand{\lists}{\mathcal Lists}
+% \newcommand{\variables}{\mathcal Var}
+\newcommand{\Epsilon}{\mathrm E}
+\newcommand{\Zeta}{\mathrm Z}
+\newcommand{\mor}{\mathrm {mor}}
+\newcommand{\op}{\mathrm {op}}
+\newcommand{\grpd}{\mathcal G}
+
+
+
+
+\title{Semantics of HoTT \\ Lecture Notes}
+\author{Paige Randall North}
+
+
+
+\begin{document}
+
+\maketitle
+
+\section{Syntactic categories}
+
+Consider a Martin-Löf type theory $\T$. By a Martin-Löf type theory, we mean a type theory with the structural rules of Martin-Löf type theory \cite{hofmann}; we are agnostic about which type formers are included in $\T$.
+
+\begin{definition}
+    The \emph{syntactic category of $\T$} is the category, denoted $\syncat{\T}$, consisting of the following.
+    \begin{itemize}
+        \item The objects are the contexts of $\T$.\footnote{These are given up to judgmental equality in $\T$: i.e., if $\Gamma \seq \Delta$ as contexts, then $\Gamma = \Delta$ as objects.}
+        \item The morphisms are the \emph{context morphisms}. A \emph{context morphism} $f : \Gamma \to \Delta$ consists of terms
+        \begin{align*}
+            \Gamma &\vdash f_0 : \Delta_0 \\
+            \Gamma &\vdash f_1 : \Delta_1[f_0 / y_0] \\
+            \vdots \\
+            \Gamma &\vdash f_n : \Delta_n [f_0 / y_0] [f_1 / y_1] \cdots [f_{n-1} / y_{n-1}]
+        \end{align*}
+        where $\Delta = (y_0 : \Delta_0 , y_1 : \Delta_1, ... , y_n : \Delta_n)$.\footnote{These morphisms are given up to judgmental equality in $\T$: i.e., if $f_0 \seq g_0 : \Delta_0, ..., f_n \seq g_n : \Delta_n [\delta_0 / y_0] \cdots [\delta_{n-1} / y_{n-1}]$, then $f = g$ as morphisms.}
+        \item Given an object/context $\Gamma$, the identity morphism $1_\Gamma : \Gamma \to \Gamma$ consists of the terms
+        \begin{align*}
+            \Gamma &\vdash x_0 : \Gamma_0 \\
+            \Gamma &\vdash x_1 : \Gamma_1 \seq \Gamma_1[x_0 / x_0] \\
+            \vdots \\
+            \Gamma &\vdash x_n : \Gamma_n \seq \Gamma_n [x_0 / x_0] [x_1 / x_1] \cdots [x_{n-1} / x_{n-1}]
+        \end{align*}
+        where $\Gamma = (x_0 : \Gamma_0 , x_1 : \Gamma_1 , ..., x_n : \Gamma_n)$.
+        \item Given morphisms $f: \Gamma \to \Delta$ and $g: \Delta \to \Epsilon$, the composition $g \circ f$ is given by the terms
+        \begin{align*}
+            \Gamma &\vdash g_0[f] : \Epsilon_0 \\
+            \Gamma &\vdash g_1[f] : \Epsilon_1 \\
+            \vdots \\
+            \Gamma &\vdash g_m[f] : \Epsilon_m
+        \end{align*}
+        where $\Delta = (y_0 : \Delta_0 , ..., y_n : \Delta_n)$, $\Epsilon = (z_0 : \Epsilon_0 , ..., z_m : \Epsilon_m)$ and where by $g_i [f]$ we mean $g_i [f_0 / y_0 ] \cdots [f_n / y_n]$.
+    \end{itemize}
+    Now we show that left unitality, right unitality, and associativity are satisfied.
+    \begin{itemize}
+        \item Given $f : \Gamma \to \Delta$, we find that $f \circ 1_\Gamma$ consists of terms of the form $\Gamma \vdash f_i[x] : \Delta_i$. But $f_i[x] \seq f_i[x_0/x_0]\cdots[x_n/x_n]$, so this is $\Gamma \vdash f_i : \Delta_i$.
+        Thus, $f \circ 1_\Gamma = f$.
+        \item Given $f : \Gamma \to \Delta$, we find that $1_\Gamma \circ f$ consists of terms of the form $\Gamma \vdash x_i[f]  : \Gamma_i$.
+            But $x_i[f]$ is $x_i [f_0/x_0] \cdots [f_n/x_n]$, so this is $\Gamma \vdash f_i  : \Gamma_i$.
+        Thus, $1_\Gamma \circ f = f$.
+        \item Given $f: \Gamma \to \Delta$, $g: \Delta \to \Epsilon$, and $h : \Epsilon \to \Zeta$, we find that $h \circ (g \circ f)$ consists of terms of the form $\Gamma \vdash h_i[g [f]]  : \Zeta_i$. But 
+        \begin{align*}
+            h_i[g [f]]&\seq h_i [g_0[f]/y_0]\cdots [g_m[f]/y_m] \\
+            &\seq  h_i \left[ \left( g_0[f_0/x_0]\cdots[f_n/x_n]\right)/y_0  \right] \cdots \left[ \left( g_n[f_0/x_0]\cdots[f_n/x_n]\right) /y_n  \right] \\
+            &\seq h_i [g_0/y_0]\cdots [g_n/y_n][f_0/x_0]\cdots[f_n/x_n] \\
+            &\seq h_i[g][f].
+        \end{align*}
+        Thus, $h \circ (g \circ f) = (h \circ g) \circ f$.
+    \end{itemize}
+\end{definition}
+
+We think of $\syncat{\T}$ as the syntax of $\T$, arranged into a category.
+
+\begin{lemma}
+    The empty context is the terminal object of $\syncat{\T}$.
+\end{lemma}
+\begin{proof}
+    Let $*$ denote the empty context. A morphism $\Gamma \to *$ consists of components for each component of $*$, that is, nothing. Thus, morphisms $\Gamma \to *$ are unique.
+\end{proof}
+
+\section{Display map categories}
+
+\begin{definition}
+    Let $\C$ be a category, and consider a subclass $\D \subseteq \mor (\C)$. $\D$ is a \emph{display structure} \cite{taylor} if for every $d : \Gamma \to \Delta$ in $\D$ and every $s: \Epsilon \to \Delta$ in $\C$, there is a given pullback $s^* d \in \D$.
+
+    We call the elements of $\D$ \emph{display maps}.
+\end{definition}
+
+In the syntactic category $\syncat{\T}$, we are often interested in objects of the form $\Gamma, z: A$ for a context $\Gamma$ and a type $A$; these are often written as $\Gamma.A$. We are then often interested in morphisms of the form $\pi_\Gamma : \Gamma.A \to \Gamma$ where each component of $\pi_\Gamma$ is given by the variable rule. We think of such a morphism as representing the type $A$ in context $\Gamma$.
+
+\begin{theorem}\label{thm:syn-display}
+    The class of maps of the form $\pi_\Gamma : \Gamma.A \to \Gamma$ forms a display structure in the syntactic category $\syncat{\T}$.
+\end{theorem}
+\begin{proof}
+    Consider $\pi_\Gamma$ and $s$ as below, where $\pi_\Gamma$ is a display map and $s$ is an arbitrary map.
+    \[
+         \begin{tikzcd}
+             \Delta.A[s] \ar[r,"s.A"] \ar[d,"\pi_\Delta"] & \Gamma.A \ar[d,"\pi_\Gamma"]
+             \\ 
+             \Delta \ar[r,"s"] & \Gamma
+         \end{tikzcd}
+    \]
+    Let $\Delta.A[s]$ denote the context $\Delta, z: A[s]$, that is more explicitly: 
+    \[\Delta, z: A[s_0/x_0]\cdots[s_n/x_n].\]
+    Let $\pi_\Delta$ be the projection given by the variable rule at each component.
+    Let $s.A$ denote the morphism consisting of $\Delta, z: A[s] \vdash s_i : \Gamma_i[s_0/x_0]\cdots[s_{i-1}/x_{i-1}]$ for each component $\Gamma_i$ of $\Gamma$ and $\Delta, z: A[s] \vdash z : A [s]$.
+    We claim that this makes the square above into a pullback square.
+
+    Consider a context $Z$ with maps $f: Z \to \Delta$ and $g: Z \to \Gamma.A$ making the appropriate square commute. Let $h$ denote the composite $f: Z \to \Gamma$. Then all components of $g$ but the last component coincide with $h$; denote the last component of $g$ by $Z \vdash g_A : A[h]$. We can construct a map $Z \to \Delta.A[s]$ whose components are $f_i$ for each $\Delta_i$ in $\Delta$, and whose last component is $Z \vdash g_A : A[h] \seq A[s][f]$. By construction, the two appropriate triangles commute, and any other $z: Z \to \Delta.A[s]$ making these two triangles commute will coincide with our constructed map. (The intuition being that the components of $Z \to \Delta.A[s]$ must basically coincide with the non-redundant components of $f$ and $g$.)
+\end{proof}
+
+\begin{definition}
+    Let $\C$ be a category, and consider a subclass $\D \subseteq \mor (\C)$. $\D$ is a \emph{class of displays} if $\D$ is stable under pullback.
+\end{definition}
+
+\begin{lemma}
+    Any class of displays is closed under isomorphism.
+\end{lemma}
+
+\begin{corollary}[to \Cref{thm:syn-display}]
+    Let $\D$ denote the closure under isomorphism of the class of maps of the form $\pi_\Gamma : \Gamma.A \to \Gamma$ in $\syncat{\T}$. Then $\D$ is a class of displays.
+\end{corollary}
+
+Now suppose that we close the class of maps of the form $\pi_\Gamma : \Gamma.A \to \Gamma$ under composition. This is then the class of maps of the form $\pi_\Gamma : \Gamma, \Delta \to \Gamma$ where $\Gamma$ and $\Delta$ are arbitrary contexts.
+
+\begin{lemma}\label{lem:syn-clan}
+    Now let $\D$ denote the class of maps of the form $\pi_\Gamma : \Gamma, \Delta \to \Gamma$ in $\syncat{\T}$. Then
+    \begin{enumerate}
+        \item $\D$ is closed under composition,
+        \item $\D$ contains all the maps to the terminal object,
+        \item every identity is in $\D$
+    \end{enumerate} 
+\end{lemma}
+\begin{proof}
+    Consider two composable maps in $\D$. Then they must be of the form $\pi_{\Gamma, \Delta}: \Gamma, \Delta, \Epsilon \to \Gamma, \Delta$ and $\pi_\Gamma : \Gamma, \Delta \to \Gamma$. Then their composition can be written as $\pi_\Gamma : \Gamma, \Delta, \Epsilon \to \Gamma$. Then $\D$ is closed under composition.
+
+    Since any context $\Gamma$ can be written as $*, \Gamma$ or $\Gamma, *$, the unique map $\pi_* : \Gamma \to *$ and the identity $\pi_\Gamma : \Gamma \to \Gamma$
+    are in $\D$.
+\end{proof}
+
+\begin{definition}
+    A clan \cite{joyal} is a category $\C$ with a terminal object $*$ and a distinguished class $\D$ of maps such that
+    \begin{enumerate}
+        \item $\D$ is closed under isomorphisms,
+        \item $\D$ contains all isomorphisms,
+        \item $\D$ is closed under composition,
+        \item $\D$ is stable under pullbacks, and
+        \item $\D$ contains all maps to the terminal object.
+    \end{enumerate}
+    Note that the first requirement follows from the others.
+\end{definition}
+
+\begin{theorem}\label{thm:syn-clan}
+    Let $\mathcal D$ denote the closure under isomorphism of morphisms of the form $\pi_\Gamma : \Gamma, \Delta \to \Gamma$ in $\syncat{\T}$. This is a clan.
+\end{theorem}
+\begin{proof}
+    The first requirement holds by construction.
+    
+    By \Cref{lem:syn-clan}, $\D$ contains all identities. Since it is then closed under isomorphism, it contains all isomorphism.
+
+    The closure under isomorphisms of a class that is closed under composition is still closed under composition, so $\D$ is closed under composition by \Cref{lem:syn-clan}.
+
+    Consider any $\pi_\Gamma : \Gamma, \Delta \to \Gamma$. We can write this as a composition of the form 
+    \[ \Gamma.\Delta_0 ... \Delta_n \xrightarrow{\pi_{\Gamma.\Delta_0...\Delta_{n-1}}} \Gamma.\Delta_0...\Delta_{n-1} \xrightarrow{\pi_{\Gamma.\Delta_0...\Delta_{n-2}}} \hdots \xrightarrow{\pi_{\Gamma}} \Gamma \] 
+
+    To take a pullback of $\pi_\Gamma : \Gamma, \Delta \to \Gamma$, we can take pullbacks of each of the component maps (which are in $\D$ by \Cref{thm:syn-display}) and compose. Since $\D$ is closed under composition, the pullback of $\pi_\Gamma $ is in $\D$.
+
+    $\D$ contains all maps to the terminal object by \Cref{lem:syn-clan}.
+\end{proof}
+
+The presence of $\Sigma$-types and a unit type allows us to conflate contexts and types.
+
+\begin{theorem}
+    If $\T$ has $\Sigma$-types (with both computation/$\beta$ and uniqueness/$\eta$ rules \cite{nlab-sums}) and a unit type, then the closure under isomorphism of the class of maps of the form $\pi_\Gamma : \Gamma. A \to \Gamma$ is a clan (and indeed, is the same class as in \Cref{thm:syn-clan}).
+\end{theorem}
+\begin{proof}
+    It is clear the the class of maps considered here is contained in the class of \Cref{thm:syn-clan}.
+    
+    Thus, we show that any map of the form $\pi_\Gamma : \Gamma, \Delta \to \Gamma$ is isomorphism to one of the form $\pi_\Gamma : \Gamma, A \to \Gamma$. We let $A$ be the following iterated $\Sigma$-type in context $\Gamma$.
+    \[\sum_{x_0 : \Delta_0} \sum_{x_1: \Delta_1} ... \sum_{x_{n-1}: \Delta_{n-1}} \Delta_n \]
+    Then we claim that $\Gamma, \Delta \cong \Gamma.A$ and this commutes with the projections to $\Gamma$.
+
+    Let the morphism $f: \Gamma, \Delta \cong \Gamma.A$ have components given by the variable rule for each component $\Gamma_i$ in $\Gamma$. For the component corresponding to $A$, we take 
+    \[ \Gamma, x_0 : \Delta_0, ..., x_n : \Delta_n \vdash \langle x_0, ..., x_n \rangle : \sum_{x_0 : \Delta_0} \sum_{x_1: \Delta_1} ... \sum_{x_{n-1}: \Delta_{n-1}} \Delta_n. \]
+    For the morphism $g: \Gamma.A \to \Gamma, \Delta$, we again let the components corresponding to each $\Gamma_i$ be given by the variable rule. For the component at a $\Delta_i$, we take 
+    \[ \Gamma, y : \sum_{x_0 : \Delta_0} \sum_{x_1: \Delta_1} ... \sum_{x_{n-1}: \Delta_{n-1}} \Delta_n \vdash 
+    \pi_i y : \Delta_i[\pi_0 y / x_0]\cdots[\pi_{i-1} y / x_{i-1}]. \]
+
+    These morphisms clearly commute with the projections to $\Gamma$, since every component of all the morphisms in question at a $\Gamma_i$ is given by the variable rule.
+
+    The fact that $f$ and $g$ are inverse to each other amount to the computation and uniqueness rules for $\Sigma$-types.
+\end{proof}
+
+\section{Categories with families}
+
+\begin{definition}
+    A \emph{category with families} consists of the following.
+    \begin{itemize}
+        \item A category $\C$.
+        \item A presheaf $\types : \C^\op \to \Set$.
+        \item A copresheaf $\terms : \int \types \to \Set$ where $\int$ denotes the Grothendieck construction. In other words, for every $\Gamma \in \C$ and $A \in \types (\Gamma)$, there is a set $\terms (\Gamma, A)$; for every $s: \Delta \to \Gamma$, there is a function $\terms(f,A):  \terms (\Gamma, A) \to \terms (\Delta, \types(f)A)$; and this is functorial.
+        \item For each object $\Gamma$ of $\C$ and for each $A \in \types(\Gamma)$, there is an object $\pi_\Gamma : \Gamma.A \to \Gamma $ of $\C / \Gamma$ with the following universal property.
+                \[ \hom_{\C / \Gamma}(s, \pi_\Gamma) \cong \terms(\types(s) A). \]
+    \end{itemize}
+\end{definition}
+
+\begin{theorem}
+    The syntactic category $\syncat{\T}$ has the structure of a category with families.
+\end{theorem}
+\begin{proof}
+    \hl{[fill in the blank]}
+\end{proof}
+
+\begin{theorem}
+    Consider a category $\C$ and a display structure $\D$. Assume that for every object $\Gamma$ of $\C$, the collection of display maps with codomain $\Gamma$ form a set\footnote{In general, they may form a proper class. If this hypothesis is not satisfied, you can prove a version of this theorem by introducing a notion of `smallness' for display maps.} and that pullback is functorial.
+
+    Then there is a category with families on $\C$.
+\end{theorem}
+\begin{proof}
+    \hl{[fill in the blank]}
+\end{proof}
+
+\begin{theorem}
+    Given a category with families $(\C, \types, \terms)$, there is a display structure $\D$ on $\C$.
+\end{theorem}
+\begin{proof}
+    \hl{[fill in the blank]}
+\end{proof}
+
+
+
+\begin{exercise}[Open ended]
+    What is the relationship between the two above constructions?
+\end{exercise}
+
+\section{Semantic universes}
+
+\begin{definition}
+    Consider a category $\C$. Say that a morphism $\pi_U : \tilde{U} \to U$ is a \emph{universe} if for any $A: \Gamma \to U$ in $\C$, there exists a chosen pullback, which will be denoted as in the following.
+    \[
+         \begin{tikzcd}
+             \Gamma.A \ar[r," "] \ar[d,"\pi_\Gamma"] & \tilde{U} \ar[d,"\pi_U"]
+             \\ 
+             \Gamma \ar[r,"A"] & U 
+         \end{tikzcd}
+    \]
+\end{definition}
+
+\begin{theorem}
+    Consider a category $\C$ with a universe $\pi_U : \tilde{U} \to U$. Let $\D$ denote the class of all pullbacks of $\pi_U$. Then $\D$ is a display structure.
+\end{theorem}
+\begin{proof}
+    \hl{[fill in the blank]}
+\end{proof}
+
+\begin{theorem}
+    Consider a category $\C$ with a universe $\pi_U : \tilde{U} \to U$. Then $\C$ has the structure of a category with families.
+\end{theorem}
+\begin{proof}
+    \hl{[fill in the blank]}
+\end{proof}
+
+\begin{exercise}[Open ended]
+    Here, we have constructed display structures and categories with families out of categories with universes. Above, we constructed display structures from categories with families and vice versa. What is the relationship between all these constructions? Notice that there is something of a mismatch when these constructions are applied to the following example.
+\end{exercise}
+
+\begin{example}
+    Consider the (1-)category $\grpd$ of groupoids; this is closed under pullback. Let $U$ denote a groupoid whose objects are small groupoids and whose isomorphisms are functors which are isomorphisms. Let $\pi_U: \tilde U \to U$ denote the Grothendieck construction of the identity $U \to U$. Then this is a universe in $\grpd$, and thus $\grpd$ has the structure of a display structure (where display maps are pullbacks of $\pi_U$, equivalently `small' isofibrations) and a category with families (where types are functors into $U$).
+
+    See \cite{nLab-iso} and \cite{nLab-grothcons} for details about isofibrations and the Grothendieck construction.
+\end{example}
+
+\begin{exercise}
+    Show that every pullback of $\pi_U$ is an isofibration. Show that every isofibration with small fibers is a pullback of $\pi_U$. You should use the Grothendieck construction.
+\end{exercise}
+
+\bibliographystyle{alpha}
+\bibliography{literature}
+
+\end{document}

@@ -1,0 +1,993 @@
+\documentclass{article}
+
+\usepackage{amsthm,amsfonts}
+\usepackage{mathpartir}
+\usepackage{mathtools}
+\usepackage{tikz-cd}
+\usepackage{hyperref,cleveref}
+\usepackage{color,soul}
+\usepackage{mathabx}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+
+% \theoremstyle{theorem}
+\newtheorem{theorem}[definition]{Theorem}
+\newtheorem{lemma}[definition]{Lemma}
+\newtheorem{corollary}[definition]{Corollary}
+\newtheorem{problem}[definition]{Problem}
+\newtheorem{exercise}[definition]{Exercise}
+\newtheorem{example}[definition]{Example}
+
+\newenvironment{construction}{\begin{proof}[Construction]}{\end{proof}}
+
+
+
+\newcommand{\types}{\mathcal T}
+\newcommand{\type}{\ \textsc{type}}
+\newcommand{\terms}{\mathcal S}
+% \newcommand{\contexts}{\mathcal C}
+% \newcommand{\context}{\textsc{ctx}}
+\newcommand{\T}{\mathbb T}
+\newcommand{\C}{\mathcal C}
+\newcommand{\D}{\mathcal D}
+\newcommand{\A}{\mathcal A}
+\newcommand{\M}{\mathcal M}
+\newcommand{\W}{\mathcal W}
+\newcommand{\F}{\mathcal F}
+\newcommand{\Set}{{\mathcal S}et}
+\newcommand{\syncat}[1]{\C [#1]}
+% \newcommand{\defeq}{\coloneqq}
+% \newcommand{\interp}[1]{\lceil #1 \rceil}
+\newcommand{\seq}{\doteq}
+% \newcommand{\lists}{\mathcal Lists}
+% \newcommand{\variables}{\mathcal Var}
+\newcommand{\Epsilon}{\mathrm E}
+\newcommand{\Zeta}{\mathrm Z}
+\newcommand{\mor}{\mathrm {mor}}
+\newcommand{\op}{\mathrm {op}}
+\newcommand{\grpd}{\mathcal G}
+\newcommand{\Id}{\mathtt {Id}}
+\newcommand{\Path}{\mathrm {Path} \ }
+
+
+\tikzset{pullbackcorner/.style={minimum size=1.2ex,path picture={
+\draw[opacity=1,black,-,#1] (-0.5ex,-0.5ex) -- (0.5ex,-0.5ex) -- (0.5ex,0.5ex);%
+}}}
+
+\newcommand{\pullback}{\arrow[dr, phantom, "" {pullbackcorner} , very near start]}
+
+
+
+\title{Semantics of HoTT \\ Lecture Notes}
+\author{Paige Randall North}
+
+
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+\section{Syntactic categories}
+
+Consider a Martin-Löf type theory $\T$. By a Martin-Löf type theory, we mean a type theory with the structural rules of Martin-Löf type theory \cite{hofmann}; we are agnostic about which type formers are included in $\T$.
+
+\begin{definition}
+    The \emph{syntactic category of $\T$} is the category, denoted $\syncat{\T}$, consisting of the following.
+    \begin{itemize}
+        \item The objects are the contexts of $\T$.\footnote{These are given up to judgmental equality in $\T$: i.e., if $\Gamma \seq \Delta$ as contexts, then $\Gamma = \Delta$ as objects.}
+        \item The morphisms are the \emph{context morphisms}. A \emph{context morphism} $f : \Gamma \to \Delta$ consists of terms
+        \begin{align*}
+            \Gamma &\vdash f_0 : \Delta_0 \\
+            \Gamma &\vdash f_1 : \Delta_1[f_0 / y_0] \\
+            \vdots \\
+            \Gamma &\vdash f_n : \Delta_n [f_0 / y_0] [f_1 / y_1] \cdots [f_{n-1} / y_{n-1}]
+        \end{align*}
+        where $\Delta = (y_0 : \Delta_0 , y_1 : \Delta_1, ... , y_n : \Delta_n)$.\footnote{These morphisms are given up to judgmental equality in $\T$: i.e., if $f_0 \seq g_0 : \Delta_0, ..., f_n \seq g_n : \Delta_n [\delta_0 / y_0] \cdots [\delta_{n-1} / y_{n-1}]$, then $f = g$ as morphisms.}
+        \item Given an object/context $\Gamma$, the identity morphism $1_\Gamma : \Gamma \to \Gamma$ consists of the terms
+        \begin{align*}
+            \Gamma &\vdash x_0 : \Gamma_0 \\
+            \Gamma &\vdash x_1 : \Gamma_1 \seq \Gamma_1[x_0 / x_0] \\
+            \vdots \\
+            \Gamma &\vdash x_n : \Gamma_n \seq \Gamma_n [x_0 / x_0] [x_1 / x_1] \cdots [x_{n-1} / x_{n-1}]
+        \end{align*}
+        where $\Gamma = (x_0 : \Gamma_0 , x_1 : \Gamma_1 , ..., x_n : \Gamma_n)$.
+        \item Given morphisms $f: \Gamma \to \Delta$ and $g: \Delta \to \Epsilon$, the composition $g \circ f$ is given by the terms
+        \begin{align*}
+            \Gamma &\vdash g_0[f] : \Epsilon_0 \\
+            \Gamma &\vdash g_1[f] : \Epsilon_1 \\
+            \vdots \\
+            \Gamma &\vdash g_m[f] : \Epsilon_m
+        \end{align*}
+        where $\Delta = (y_0 : \Delta_0 , ..., y_n : \Delta_n)$, $\Epsilon = (z_0 : \Epsilon_0 , ..., z_m : \Epsilon_m)$ and where by $g_i [f]$ we mean $g_i [f_0 / y_0 ] \cdots [f_n / y_n]$.
+    \end{itemize}
+    Now we show that left unitality, right unitality, and associativity are satisfied.
+    \begin{itemize}
+        \item Given $f : \Gamma \to \Delta$, we find that $f \circ 1_\Gamma$ consists of terms of the form $\Gamma \vdash f_i[x] : \Delta_i$. But $f_i[x] \seq f_i[x_0/x_0]\cdots[x_n/x_n]$, so this is $\Gamma \vdash f_i : \Delta_i$.
+        Thus, $f \circ 1_\Gamma = f$.
+        \item Given $f : \Gamma \to \Delta$, we find that $1_\Gamma \circ f$ consists of terms of the form $\Gamma \vdash x_i[f]  : \Gamma_i$.
+            But $x_i[f]$ is $x_i [f_0/x_0] \cdots [f_n/x_n]$, so this is $\Gamma \vdash f_i  : \Gamma_i$.
+        Thus, $1_\Gamma \circ f = f$.
+        \item Given $f: \Gamma \to \Delta$, $g: \Delta \to \Epsilon$, and $h : \Epsilon \to \Zeta$, we find that $h \circ (g \circ f)$ consists of terms of the form $\Gamma \vdash h_i[g [f]]  : \Zeta_i$. But 
+        \begin{align*}
+            h_i[g [f]]&\seq h_i [g_0[f]/y_0]\cdots [g_m[f]/y_m] \\
+            &\seq  h_i \left[ \left( g_0[f_0/x_0]\cdots[f_n/x_n]\right)/y_0  \right] \cdots \left[ \left( g_n[f_0/x_0]\cdots[f_n/x_n]\right) /y_n  \right] \\
+            &\seq h_i [g_0/y_0]\cdots [g_n/y_n][f_0/x_0]\cdots[f_n/x_n] \\
+            &\seq h_i[g][f].
+        \end{align*}
+        Thus, $h \circ (g \circ f) = (h \circ g) \circ f$.
+    \end{itemize}
+\end{definition}
+
+We think of $\syncat{\T}$ as the syntax of $\T$, arranged into a category.
+
+\begin{lemma}
+    The empty context is the terminal object of $\syncat{\T}$.
+\end{lemma}
+\begin{proof}
+    Let $*$ denote the empty context. A morphism $\Gamma \to *$ consists of components for each component of $*$, that is, nothing. Thus, morphisms $\Gamma \to *$ are unique.
+\end{proof}
+
+\section{Display map categories}
+
+\begin{definition}
+    Let $\C$ be a category, and consider a subclass $\D \subseteq \mor (\C)$. $\D$ is a \emph{display structure} \cite{taylor} if for every $d : \Gamma \to \Delta$ in $\D$ and every $s: \Epsilon \to \Delta$ in $\C$, there is a given pullback $s^* d \in \D$.
+
+    We call the elements of $\D$ \emph{display maps}.
+\end{definition}
+
+In the syntactic category $\syncat{\T}$, we are often interested in objects of the form $\Gamma, z: A$ for a context $\Gamma$ and a type $A$; these are often written as $\Gamma.A$. We are then often interested in morphisms of the form $\pi_\Gamma : \Gamma.A \to \Gamma$ where each component of $\pi_\Gamma$ is given by the variable rule. We think of such a morphism as representing the type $A$ in context $\Gamma$.
+
+\begin{theorem}\label{thm:syn-display}
+    The class of maps of the form $\pi_\Gamma : \Gamma.A \to \Gamma$ forms a display structure in the syntactic category $\syncat{\T}$.
+\end{theorem}
+\begin{proof}
+    Consider $\pi_\Gamma$ and $s$ as below, where $\pi_\Gamma$ is a display map and $s$ is an arbitrary map.
+    \[
+         \begin{tikzcd}
+             \Delta.A[s] \ar[r,"s.A"] \ar[d,"\pi_\Delta"] \pullback & \Gamma.A \ar[d,"\pi_\Gamma"]
+             \\ 
+             \Delta \ar[r,"s"] & \Gamma
+         \end{tikzcd}
+    \]
+    Let $\Delta.A[s]$ denote the context $\Delta, z: A[s]$, that is more explicitly: 
+    \[\Delta, z: A[s_0/x_0]\cdots[s_n/x_n].\]
+    Let $\pi_\Delta$ be the projection given by the variable rule at each component.
+    Let $s.A$ denote the morphism consisting of $\Delta, z: A[s] \vdash s_i : \Gamma_i[s_0/x_0]\cdots[s_{i-1}/x_{i-1}]$ for each component $\Gamma_i$ of $\Gamma$ and $\Delta, z: A[s] \vdash z : A [s]$.
+    We claim that this makes the square above into a pullback square.
+
+    Consider a context $Z$ with maps $f: Z \to \Delta$ and $g: Z \to \Gamma.A$ making the appropriate square commute. Let $h$ denote the composite $f: Z \to \Gamma$. Then all components of $g$ but the last component coincide with $h$; denote the last component of $g$ by $Z \vdash g_A : A[h]$. We can construct a map $Z \to \Delta.A[s]$ whose components are $f_i$ for each $\Delta_i$ in $\Delta$, and whose last component is $Z \vdash g_A : A[h] \seq A[s][f]$. By construction, the two appropriate triangles commute, and any other $z: Z \to \Delta.A[s]$ making these two triangles commute will coincide with our constructed map. (The intuition being that the components of $Z \to \Delta.A[s]$ must basically coincide with the non-redundant components of $f$ and $g$.)
+\end{proof}
+
+\begin{definition}
+    Let $\C$ be a category, and consider a subclass $\D \subseteq \mor (\C)$. $\D$ is a \emph{class of displays} if $\D$ is stable under pullback.
+\end{definition}
+
+\begin{lemma}
+    Any class of displays is closed under isomorphism.
+\end{lemma}
+
+\begin{corollary}[to \Cref{thm:syn-display}]
+    Let $\D$ denote the closure under isomorphism of the class of maps of the form $\pi_\Gamma : \Gamma.A \to \Gamma$ in $\syncat{\T}$. Then $\D$ is a class of displays.
+\end{corollary}
+
+Now suppose that we close the class of maps of the form $\pi_\Gamma : \Gamma.A \to \Gamma$ under composition. This is then the class of maps of the form $\pi_\Gamma : \Gamma, \Delta \to \Gamma$ where $\Gamma$ and $\Delta$ are arbitrary contexts.
+
+\begin{lemma}\label{lem:syn-clan}
+    Now let $\D$ denote the class of maps of the form $\pi_\Gamma : \Gamma, \Delta \to \Gamma$ in $\syncat{\T}$. Then
+    \begin{enumerate}
+        \item $\D$ is closed under composition,
+        \item $\D$ contains all the maps to the terminal object,
+        \item every identity is in $\D$
+    \end{enumerate} 
+\end{lemma}
+\begin{proof}
+    Consider two composable maps in $\D$. Then they must be of the form $\pi_{\Gamma, \Delta}: \Gamma, \Delta, \Epsilon \to \Gamma, \Delta$ and $\pi_\Gamma : \Gamma, \Delta \to \Gamma$. Then their composition can be written as $\pi_\Gamma : \Gamma, \Delta, \Epsilon \to \Gamma$. Then $\D$ is closed under composition.
+
+    Since any context $\Gamma$ can be written as $*, \Gamma$ or $\Gamma, *$, the unique map $\pi_* : \Gamma \to *$ and the identity $\pi_\Gamma : \Gamma \to \Gamma$
+    are in $\D$.
+\end{proof}
+
+\begin{definition}
+    A clan \cite{joyal} is a category $\C$ with a terminal object $*$ and a distinguished class $\D$ of maps such that
+    \begin{enumerate}
+        \item $\D$ is closed under isomorphisms,
+        \item $\D$ contains all isomorphisms,
+        \item $\D$ is closed under composition,
+        \item $\D$ is stable under pullbacks, and
+        \item $\D$ contains all maps to the terminal object.
+    \end{enumerate}
+    Note that the first requirement follows from the others.
+\end{definition}
+
+\begin{theorem}\label{thm:syn-clan}
+    Let $\mathcal D$ denote the closure under isomorphism of morphisms of the form $\pi_\Gamma : \Gamma, \Delta \to \Gamma$ in $\syncat{\T}$. This is a clan.
+\end{theorem}
+\begin{proof}
+    The first requirement holds by construction.
+    
+    By \Cref{lem:syn-clan}, $\D$ contains all identities. Since it is then closed under isomorphism, it contains all isomorphism.
+
+    The closure under isomorphisms of a class that is closed under composition is still closed under composition, so $\D$ is closed under composition by \Cref{lem:syn-clan}.
+
+    Consider any $\pi_\Gamma : \Gamma, \Delta \to \Gamma$. We can write this as a composition of the form 
+    \[ \Gamma.\Delta_0 ... \Delta_n \xrightarrow{\pi_{\Gamma.\Delta_0...\Delta_{n-1}}} \Gamma.\Delta_0...\Delta_{n-1} \xrightarrow{\pi_{\Gamma.\Delta_0...\Delta_{n-2}}} \hdots \xrightarrow{\pi_{\Gamma}} \Gamma \] 
+
+    To take a pullback of $\pi_\Gamma : \Gamma, \Delta \to \Gamma$, we can take pullbacks of each of the component maps (which are in $\D$ by \Cref{thm:syn-display}) and compose. Since $\D$ is closed under composition, the pullback of $\pi_\Gamma $ is in $\D$.
+
+    $\D$ contains all maps to the terminal object by \Cref{lem:syn-clan}.
+\end{proof}
+
+The presence of $\Sigma$-types and a unit type allows us to conflate contexts and types.
+
+\begin{theorem}
+    If $\T$ has $\Sigma$-types (with both computation/$\beta$ and uniqueness/$\eta$ rules \cite{nlab-sums}) and a unit type, then the closure under isomorphism of the class of maps of the form $\pi_\Gamma : \Gamma. A \to \Gamma$ is a clan (and indeed, is the same class as in \Cref{thm:syn-clan}).
+\end{theorem}
+\begin{proof}
+    It is clear the the class of maps considered here is contained in the class of \Cref{thm:syn-clan}.
+    
+    Thus, we show that any map of the form $\pi_\Gamma : \Gamma, \Delta \to \Gamma$ is isomorphism to one of the form $\pi_\Gamma : \Gamma, A \to \Gamma$. We let $A$ be the following iterated $\Sigma$-type in context $\Gamma$.
+    \[\sum_{x_0 : \Delta_0} \sum_{x_1: \Delta_1} ... \sum_{x_{n-1}: \Delta_{n-1}} \Delta_n \]
+    Then we claim that $\Gamma, \Delta \cong \Gamma.A$ and this commutes with the projections to $\Gamma$.
+
+    Let the morphism $f: \Gamma, \Delta \cong \Gamma.A$ have components given by the variable rule for each component $\Gamma_i$ in $\Gamma$. For the component corresponding to $A$, we take 
+    \[ \Gamma, x_0 : \Delta_0, ..., x_n : \Delta_n \vdash \langle x_0, ..., x_n \rangle : \sum_{x_0 : \Delta_0} \sum_{x_1: \Delta_1} ... \sum_{x_{n-1}: \Delta_{n-1}} \Delta_n. \]
+    For the morphism $g: \Gamma.A \to \Gamma, \Delta$, we again let the components corresponding to each $\Gamma_i$ be given by the variable rule. For the component at a $\Delta_i$, we take 
+    \[ \Gamma, y : \sum_{x_0 : \Delta_0} \sum_{x_1: \Delta_1} ... \sum_{x_{n-1}: \Delta_{n-1}} \Delta_n \vdash 
+    \pi_i y : \Delta_i[\pi_0 y / x_0]\cdots[\pi_{i-1} y / x_{i-1}]. \]
+
+    These morphisms clearly commute with the projections to $\Gamma$, since every component of all the morphisms in question at a $\Gamma_i$ is given by the variable rule.
+
+    The fact that $f$ and $g$ are inverse to each other amount to the computation and uniqueness rules for $\Sigma$-types.
+\end{proof}
+
+\section{Categories with families}
+
+\begin{definition}
+    A \emph{category with families} consists of the following.
+    \begin{itemize}
+        \item A category $\C$.
+        \item A presheaf $\types : \C^\op \to \Set$.
+        \item A copresheaf $\terms : \int \types \to \Set$ where $\int$ denotes the Grothendieck construction. In other words, for every $\Gamma \in \C$ and $A \in \types (\Gamma)$, there is a set $\terms (\Gamma, A)$; for every $s: \Delta \to \Gamma$, there is a function $\terms(f,A):  \terms (\Gamma, A) \to \terms (\Delta, \types(f)A)$; and this is functorial.
+        \item For each object $\Gamma$ of $\C$ and for each $A \in \types(\Gamma)$, there is an object $\pi_\Gamma : \Gamma.A \to \Gamma $ of $\C / \Gamma$ with the following universal property.
+                \[ \hom_{\C / \Gamma}(s, \pi_\Gamma) \cong \terms(\types(s) A). \]
+    \end{itemize}
+\end{definition}
+
+\begin{theorem}
+    The syntactic category $\syncat{\T}$ has the structure of a category with families.
+\end{theorem}
+\begin{proof}
+    The underlying category is $\syncat{\T}$.
+
+    For the presheaf $\types : \C^\op \to \Set$, we set $\types(\Gamma)$ to be the types of $\T$ in context $\Gamma$. Given $s : \Gamma \to \Delta$, we set $\types(\Delta) \to \types(\Gamma)$ to be substitution by $s$, which we have previously denoted $-[s]$.
+
+    For the copresheaf $\terms : \int \types \to \Set$, we set $\terms(\Gamma, A)$ to be the terms of $A$ in context $\Gamma$. Given $s : \Delta \to \Gamma$, the function $\terms(f,A):  \terms (\Gamma, A) \to \terms (\Delta, \types(f)A)$ is also given by substitution by $s$.
+
+    We have objects $\pi_\Gamma : \Gamma.A \to \Gamma $ of $\C / \Gamma$. For the universal property, consider an arbitrary $s : \Delta \to \Gamma$. Then an $f \in \hom_{\C / \Gamma}(s, \pi_\Gamma)$ consists of (many components which must coincide with $s$ and) and one component 
+    \[ \Delta \vdash f : A[s], \]
+    which is exactly an element of $\terms(\types(s) A)$.
+\end{proof}
+
+\begin{theorem}
+    Consider a category $\C$ and a display structure $\D$. Assume that for every object $\Gamma$ of $\C$, the collection of display maps with codomain $\Gamma$ form a set\footnote{In general, they may form a proper class. If this hypothesis is not satisfied, you can prove a version of this theorem by introducing a notion of `smallness' for display maps.} and that pullback is functorial.
+
+    Then there is a category with families on $\C$.
+\end{theorem}
+\begin{proof}
+    We construct the category with families as follows.
+    \begin{itemize}
+        \item The underlying category is $\C$.
+        \item The presheaf $\types$ is given by sending an object $\Gamma$ of $\C$ to the set of display maps with domain $\Gamma$. The contravariant functorial action is given by pullback: i.e. given $T \in \types (\Gamma)$ and $f: \Delta \to \Gamma$, set $\types (f) T := f^* T$.
+        \item The copresheaf $\terms$ is given by setting $\terms (\Gamma , T)$ to be the set of sections of $T$. The functorial action is again given by pullback.
+        \item For each object $\Gamma$ of $\C$ and $T \in \types (\Gamma)$, we take $\Gamma.T$ to be the domain of the display map $T$, and take $\pi_\Gamma$ to be $T$ itself. Now, under the assignments that we have made, the isomorphism we need to establish says that $\hom_{\C / \Gamma}(s, T)$ is in natural bijection with sections of $s^* T$. But this is given by the universal property of $s^* T$, and thus holds (and holds naturally). \qedhere
+    \end{itemize}
+\end{proof}
+
+\begin{theorem}
+    Given a category with families $(\C, \types, \terms)$, there is a display structure $\D$ on $\C$.
+\end{theorem}
+\begin{proof}
+    We take $\D$ to be all morphisms of the form $\pi_\Gamma : \Gamma. A \to \Gamma$.
+
+    Let $s : \Delta \to \Gamma$. We want to show that $\pi_\Delta : \Delta. (\types(s) A) \to \Delta$ is a pullback of $\pi_\Gamma$ along $s$. Then we will say that $\pi_\Delta$ is the chosen pullback of $\pi_\Gamma$ along $s$.
+
+    First, let $\iota_x$ denote the composition of the following bijections (where the first and third are part of the definition of category with families, and the middle is functoriality of $\types$).
+    \[ \hom_{\C / \Delta}(x,\pi_\Delta)  \cong \terms(\types(x) \types(s) A) \cong  \terms(\types(sx) A) \cong \hom_{\C / \Gamma}(sx, \pi_\Gamma)\]
+
+    We need to complete the pullback square. Let $\tilde s$ denote \[\iota_{\pi_\Delta} (1_{\pi_\Delta}) \in \hom_{\C / \Gamma}(s \pi_\Delta, \pi_\Gamma).\] Now we claim that the square below is a pullback.
+
+    To this end, consider a $x : Z \to \Delta$ and $y: Z \to \Gamma.A$.
+    \[
+         \begin{tikzcd}
+            Z \ar[dr,bend right,"x"] \ar[rr,bend left,"y"]  & \Delta. (\types(s) A) \ar[r,"\tilde s"] \ar[d,"\pi_\Delta"] \pullback & \Gamma.A \ar[d,"\pi_\Gamma"]
+             \\ 
+             & \Delta \ar[r,"s"] & \Gamma
+         \end{tikzcd}
+    \]
+    Then we have a morphism $y: sx \to \pi_\Gamma$ in the slice $\C / \Gamma$, and so $\iota^{-1}_x y$ is a morphism $x \to \pi_\Delta$ in $\C/\Delta$. That is, $\iota^{-1}_x y$ is a morphism $Z \to \Delta. (\types(s) A)$ making the bottom-left triangle commute. Naturality of $\iota_x$ ensures that the upper triangle commutes. 
+    
+    That is, for any $z : x \to \pi_\Delta$, naturality produces the following commutative diagram where $z^*$ denotes precomposition.
+    \[
+         \begin{tikzcd}
+            \hom_{\C / \Delta}(\pi_\Delta,\pi_\Delta) \ar[r,"\iota_{\pi_\Delta}"] \ar[d,"z^*"] & \hom_{\C / \Gamma}(s\pi_\Delta, \pi_\Gamma) \ar[d,"z^*"]
+             \\ 
+             \hom_{\C / \Delta}(x,\pi_\Delta) \ar[r,"\iota_{x}"] & \hom_{\C / \Gamma}(sx, \pi_\Gamma)
+         \end{tikzcd}
+    \]
+    It tells us that $z^* \iota_{\pi_\Delta} 1_{\pi_\Delta}= \iota_x z^* 1_{\pi_\Delta}$. But $z^* \iota_{\pi_\Delta} 1_{\pi_\Delta} = z^* \tilde s = \tilde s z$ and $\iota_x z^* 1_{\pi_\Delta} = \iota_x z$. Thus, $\tilde s z = \iota_x z$. When $z = \iota^{-1}_x y$, we find that $\tilde s (\iota^{-1}_x y) = y$ and the upper triangle commutes.
+
+    
+    To show that this is unique, consider another $z : Z \to \Delta. (\types(s) A)$ making the diagram commute. If $\iota_x z = y$, then $z = \iota_x^{-1} y$ since $\iota_x$ is a bijection. But by our above calculation, $\iota_x z = \tilde s z$, and thus $\iota_x z = y$.
+\end{proof}
+
+\begin{exercise}[Open ended]
+    What is the relationship between the two above constructions?
+\end{exercise}
+
+\section{Semantic universes}
+
+\begin{definition}
+    Consider a category $\C$. Say that a morphism $\pi_U : \tilde{U} \to U$ is a \emph{universe} if for any $A: \Gamma \to U$ in $\C$, there exists a chosen pullback, which will be denoted as in the following.
+    \[
+         \begin{tikzcd}
+             \Gamma.A \ar[r," "] \ar[d,"\pi_\Gamma"] \pullback & \tilde{U} \ar[d,"\pi_U"]
+             \\ 
+             \Gamma \ar[r,"A"] & U 
+         \end{tikzcd}
+    \]
+\end{definition}
+
+\begin{theorem}
+    Consider a category $\C$ with a universe $\pi_U : \tilde{U} \to U$. Let $\D$ denote the class of all pullbacks of $\pi_U$. Then $\D$ is a display structure.
+\end{theorem}
+\begin{proof}
+    We need to show that there exist chosen pullbacks of any $\pi_Gamma : \Gamma. A \to \Gamma$ along any $f: \Delta \to \Gamma$. We let the chosen pullback be $\Gamma_Delta : \Delta. (A f) \to \Delta$, i.e., the chosen pullback of $\pi_U$ along $A f$. By the pullback-pasting law this is a pullback.
+\end{proof}
+
+\begin{theorem}
+    Consider a category $\C$ with a universe $\pi_U : \tilde{U} \to U$. Then $\C$ has the structure of a category with families.
+\end{theorem}
+\begin{proof}
+    We need to show that there exist chosen pullbacks of any $\pi_Gamma : \Gamma. A \to \Gamma$ along any $f: \Delta \to \Gamma$. We let the chosen pullback be $\Gamma_Delta : \Delta. (A f) \to \Delta$, i.e., the chosen pullback of $\pi_U$ along $A f$. By the pullback-pasting law this is a pullback.
+    We construct the category with families as follows.
+    \begin{itemize}
+        \item The underlying category is $\C$.
+        \item We set the presheaf $\types := \hom(- , U)$.
+        \item For each object $\Gamma$ of $\C$ and $A \in \types (\Gamma)$, we take $\pi_\Gamma : \Gamma.A \to \Gamma$ to be the specified pullback of $\pi_U$ along $A$.
+        \item The copresheaf $\terms$ is given by setting $\terms (\Gamma , T)$ to be the set of sections of $\pi_\Gamma$. The functorial action is given by pullback.
+        \item Now, under the assignments that we have made, the isomorphism we need to establish says that $\hom_{\C / \Gamma}(s, \pi_\Gamma)$ is in natural bijection with sections of $s^* (\pi_\Gamma)$. But this is given by the universal property of $s^* (\pi_\Gamma)$ (and is a nice diagram chase to sketch out). \qedhere
+    \end{itemize}
+\end{proof}
+
+\begin{exercise}[Open ended]
+    Here, we have constructed display structures and categories with families out of categories with universes. Above, we constructed display structures from categories with families and vice versa. What is the relationship between all these constructions? Notice that there is something of a mismatch when these constructions are applied to the following example.
+\end{exercise}
+
+\begin{example}
+    Consider the (1-)category $\grpd$ of groupoids; this is closed under pullback. Let $U$ denote a groupoid whose objects are small groupoids and whose isomorphisms are functors which are isomorphisms. Let $\pi_U: \tilde U \to U$ denote the Grothendieck construction of the identity $U \to U$. Then this is a universe in $\grpd$, and thus $\grpd$ has the structure of a display structure (where display maps are pullbacks of $\pi_U$, equivalently `small' isofibrations) and a category with families (where types are functors into $U$).
+
+    See \cite{nLab-iso} and \cite{nLab-grothcons} for details about isofibrations and the Grothendieck construction.
+\end{example}
+
+\begin{exercise}
+    Show that every pullback of $\pi_U$ is an isofibration. Show that every isofibration with small fibers is a pullback of $\pi_U$. You should use the Grothendieck construction.
+\end{exercise}
+
+\section{Type formers in display maps}
+
+In this section, fix a category $\C$ with display maps $\D$. We will only make minimal assumptions in order to see why the other assumptions are natural. We assume that $\C$ has a terminal object and that $\D$ is stable under pullback.
+
+We explain how to interpret various type formers in a class of display maps. The rules that comprise a type former stipulate some structure involving contexts, types, and terms. Thus, we will interpret these rules as stipulating some structure in such a category with display maps involving objects (contexts), display maps (types), and morphisms (terms). We interpret substitution by pullback and weakening also by certain pullbacks.
+
+We ask that all operations are stable under pullback because in the type theory they are stable under substitution. In cases where it is possible to ask for functoriality of this stability, we do, since that is the case in type theory. The stability that we ask for is weak: it is natural from the standpoint of category theory to ask for stability up to isomorphism for the unit type, sum types, and product types since these are given by universal properties, and it is natural from the standpoint of homotopy theory to ask for stability up to homotopy for the identity type. These weak versions of stability can be strictified into a strict model using \cite{lumsdaine-warren}.
+
+\begin{theorem}
+    Consider a contexts $\Gamma, \Delta$ and $\Gamma, \Delta'$ in our type theory $\T$.
+    In the syntactic category $\syncat{\T}$, the context $\Gamma, \Delta, \Delta'$ is the pullback of the projections $\Gamma, \Delta \to \Gamma$ and $\Gamma, \Delta' \to \Gamma$.
+\end{theorem}
+
+\begin{proof}
+    By \emph{projection}, we mean a morphism that is obtained by iterated applications of the variable rule. There are obvious projections $\Gamma, \Delta, \Delta' \to \Gamma, \Delta$ and $\Gamma, \Delta, \Delta' \to \Gamma, \Delta'$. Thus we have a square as below.
+    \[
+         \begin{tikzcd}
+             \Gamma, \Delta, \Delta' \ar[r," "] \ar[d," "] \pullback & \Gamma, \Delta' \ar[d," "]
+             \\ 
+             \Gamma, \Delta \ar[r," "] & \Gamma
+         \end{tikzcd}
+    \]
+    Given an object $Z$ with morphisms to $\Gamma, \Delta$ and $\Gamma, \Delta'$ making the appropriate square commute, one can construct a unique morphism $Z \to \Gamma, \Delta, \Delta'$ making the appropriate triangles commute.
+\end{proof}
+
+% \subsection{Products}
+
+% \begin{theorem}
+%     Consider a context $\Gamma$ of $\T$ and a simple type types $B$ in $\T$ (i.e., type in the empty context). Then in the syntactic category $\Gamma. A$ has the universal property of the product of $\Gamma$ and $A$.
+% \end{theorem}
+% \begin{proof}
+%     First, we have maps $\pi_\Gamma : \Gamma. A \to A$ and $\pi_A : \Gamma. A \to A$ using the variable rule. Given any maps $\gamma : Z \to \Gamma$ and $a: Z \to A$ we can construct a map $\langle \gamma , a \rangle : Z \to A . B$, which is unique making the appropriate diagram commute.
+% \end{proof}
+
+% \begin{exercise}
+%     Compare this with the substitution $B[\pi_*]$ where $\pi_* : A \to *$.
+% \end{exercise}
+
+% Thus, we interpret simple types $A$ as display maps with codomain $*$ and context extension $\Gamma.A$ of a context $\Gamma$ by $A$ as the product.
+
+\subsection{The unit type}
+
+% \begin{theorem}
+%     Suppose that a type theory $\T$ has a unit type. Then for every object $\Gamma$ of the syntactic category $\syncat{\T}$, there is a display map that is an isomorphism and that has codomain $\Gamma$.
+% \end{theorem}
+% \begin{proof}
+%     Call the unit type $\mathtt {unit}$.
+%     We claim that $\pi_\Gamma : \Gamma. \mathtt {unit} \to \Gamma$ is an isomorphism.
+%     The claimed inverse is the section $\mathtt{tt} : \Gamma \to \Gamma.\mathtt{unit}$ that has components $\Gamma \vdash x_i : \Gamma_i$ given by the variable rule for each $\Gamma_i$ in $\Gamma$ and final component $\Gamma \vdash \mathtt {tt} : \mathtt {unit}$ (where $\mathtt {tt}$ denotes the term of $\mathtt {unit}$ given in the introduction rule).
+%     We claim that $\pi_\Gamma \mathtt{tt} = 1_{\Gamma.\mathtt{unit}}$.
+%     The composition $\pi_\Gamma \mathtt{tt}$ has components $\Gamma \vdash x_i : \Gamma_i$ given by the variable rule for each $\Gamma_i$ in $\Gamma$ and final component $\Gamma, x : \mathtt {unit} \vdash \mathtt{tt} : \mathtt {unit}$.
+% \end{proof}
+
+Consider the rules for the unit type. Interpreted semantically, they say that there exists a unit type, i.e. a display map $\mathtt{unit} \to *$ (by formation), together with a section $\mathtt{tt} : * \to \mathtt{unit}$ (introduction). The elimination rule tells us that given any object $\Gamma$ and display map $\pi_{\Gamma.\mathtt{unit}}: D \to \Gamma.\mathtt{unit}$ together with a morphism $d : \Gamma \to D $ making the solid diagram below commute, there is a section $\overline d$ of $\pi_{\Gamma . \mathtt{unit}}$. Here, $\Gamma.\mathtt{tt}$ is the weakening of $\mathtt{tt}$ by $\Gamma$, so it is the product of $\mathtt{tt}$ by $\Gamma$.
+The computation rule tells us that this section makes the diagram commute.
+\[
+     \begin{tikzcd}
+         && \Gamma.\mathtt{unit}. D \ar[d,"\pi_{\Gamma.\mathtt{unit}}"] \\
+         \Gamma \ar[rr,"\Gamma.\mathtt{tt}"] \ar[urr," d"] && \Gamma.\mathtt{unit} \ar[u,bend left,"\overline d",dotted]
+     \end{tikzcd}
+\]
+
+Moreover, this needs to be stable under substitution in $\Gamma$. That is, given a morphism $s: \Delta \to \Gamma$, pulling back the above diagram along $s$ should produce the corresponding diagram in context $\Delta$.
+
+\begin{definition}
+    A category with display maps $(\C,\D)$ \emph{models the unit type} if 
+    \begin{itemize}
+    \item there is a display map $\mathtt{unit} \to *$
+    \item with a section $\mathtt{tt} : * \to \mathtt{unit}$ such that
+    \item for any diagram of the form of the following solid diagram, 
+    \[
+     \begin{tikzcd}
+         && \Gamma.\mathtt{unit}. D \ar[d,"\pi_{\Gamma.\mathtt{unit}}"] \\
+         \Gamma \ar[rr,"\Gamma.\mathtt{tt}"] \ar[urr," d"] && \Gamma.\mathtt{unit} \ar[u,bend left,"\overline d",dotted]
+     \end{tikzcd}
+    \]
+    there is a dotted arrow as above making the diagram commute
+    \item and given any morphism $s: \Delta \to \Gamma$, the above operation is stable under pullback: that is, $\overline{s^* d} = s^* \overline d$.
+    \end{itemize}
+\end{definition}
+
+\begin{theorem}
+    Suppose that for the terminal object $*$, the identity $1_* : * \to *$ is a display map. Then $(\C,\D)$ gives an interpretation of the unit type.
+\end{theorem}
+\begin{proof}
+    If we take $\mathtt {unit}$ to be $*$ and $\mathtt{tt}$ to be $1_*$, then we can take $\Gamma.\mathtt{tt}$ to be the identity $1_\Gamma$.
+    
+    Thus, we take $\overline d := d$. Then we clearly have $\overline{s^* d} = s^* \overline d$ for any $s$.
+\end{proof}
+
+We want our category with display maps to model terminal objects, so we often assume the hypothesis of the preceding theorem. But then we find the following.
+
+\begin{lemma}
+    The identity $1_* : * \to *$ is a display map if and only if all isomorphisms are display maps.
+\end{lemma}
+\begin{proof}
+    The ``if" part is obvious. For the ``only if" part, recall that $\D$ is required to be stable under pullback and that
+    given any isomorphism $i: X \to Y$, the following is a pullback square.
+    \[
+         \begin{tikzcd}
+             X \ar[r,""] \ar[d,"i"] \pullback & * \ar[d," "]
+             \\ 
+             Y \ar[r," "] & *
+         \end{tikzcd}
+    \]
+\end{proof}
+
+
+
+\subsection{Dependent sum types}
+
+Consider the rules for the $\Sigma$-types. The formation rule tells us that for any judgment of the form $\Gamma, A \vdash B \type$, there is a judgment of the form $\Gamma \vdash \Sigma_A B \type$. Thus, semantically we interpret this as saying that for any pair of display maps $\Gamma.A . B \xrightarrow{\pi_{\Gamma.A}} \Gamma. A  \xrightarrow{\pi_{\Gamma}} \Gamma$, there is a display map $\pi_\Gamma : \Sigma_A B \to \Gamma$.
+
+The introduction rule gives us a judgment of the form $\Gamma , x : A , y : B \vdash \langle x , y \rangle : \Sigma_A B$. We interpret this as a context morphism $\langle \rangle : \Gamma. A . B \to \Sigma_A B$ over $\Gamma$: that is, the following diagram must commute.
+\[
+     \begin{tikzcd}
+         \Gamma . A . B \ar[d, "\pi_{\Gamma.A}"] \ar[r,"\langle \rangle"] & \Sigma_A B \ar[dd,"\pi_\Gamma"] \\
+         \Gamma . A \ar[dr, "\pi_{\Gamma}"] \\
+         & \Gamma
+     \end{tikzcd}
+\] 
+
+Now, we follow the negative presentation of $\Sigma$-types, including both the computation and uniqueness rules (see \cite{nlab-sums}). When one includes the uniqueness rule, this is often called a \emph{strong $\Sigma$-type}.
+
+The elimination rules give us judgments $\Gamma, x: \Sigma_A B \vdash \pi_1 x : A$ and $\Gamma, x: \Sigma_A B \vdash \pi_2 x : B(\pi_1 x)$. Semantically, this corresponds to a morphism $\pi : \Gamma. \Sigma_A B \to \Gamma . A . B$ over $\Gamma$: that is, the following diagram must commute.
+\[
+     \begin{tikzcd}
+          \Sigma_A B \ar[r,"\pi"]  \ar[dd,"\pi_\Gamma"] &  \Gamma . A . B \ar[d, "\pi_{\Gamma.A}"] \\
+         & \Gamma . A \ar[dl, "\pi_{\Gamma}"] \\
+         \Gamma
+     \end{tikzcd}
+\] 
+The computation rule tells us that $\pi \langle \rangle = 1_{\Gamma . A . B}$ and uniqueness tells us that $ \langle \rangle \pi = 1_{\Gamma . \Sigma_A B}$.
+
+Moreover, we ask that this structure is stable under pullback (up to isomorphism). Thus, for any $s: \Delta \to \Gamma$, we must have $ s^* (\Sigma_A B ) \cong \Sigma_{s^* A} (s ^* B)$.
+
+\begin{definition}
+    A category with display maps $(\C, \D)$ \emph{models strong $\Sigma$-types} if 
+    \begin{itemize}
+        \item for any pair of display maps $\Gamma.A . B \xrightarrow{\pi_{\Gamma.A}} \Gamma. A  \xrightarrow{\pi_{\Gamma}} \Gamma$, there is a display map $\pi_\Gamma : \Sigma_A B \to \Gamma$
+        \item together with an isomorphism $\langle \rangle : \Gamma. A . B \to \Sigma_A B$ making the following diagram commute
+        \[
+            \begin{tikzcd}
+                \Gamma . A . B \ar[d, "\pi_{\Gamma.A}"] \ar[r,"\langle \rangle"] & \Sigma_A B \ar[dd,"\pi_\Gamma"] \\
+                \Gamma . A \ar[dr, "\pi_{\Gamma}"] \\
+                & \Gamma
+            \end{tikzcd}
+       \] 
+       \item such that for any $s : \Delta \to \Gamma$, we have an isomorphism $ s^* (\Sigma_A B ) \cong \Sigma_{s^* A} (s ^* B)$ commuting with $\langle \rangle$, where by $\Sigma_{s^* A} (s ^* B)$, we mean the domain of the display map obtained from $s^* (\Gamma.A . B) \xrightarrow{s^* (\Gamma. A)} s^* (\Gamma. A)  \xrightarrow{\pi_{\Delta}} \Delta$.
+    \end{itemize}
+\end{definition}
+
+\begin{theorem}
+    If $\D$ is closed under composition, then $(\C, \D)$ models strong $\Sigma$-types (and thus it also models $\Sigma$-types without the uniqueness rule).
+\end{theorem}
+\begin{proof}
+    First, suppose that $\D$ is closed under composition. Given a pair of display maps $\Gamma.A . B \xrightarrow{\pi_{\Gamma.A}} \Gamma. A  \xrightarrow{\pi_{\Gamma}} \Gamma$, we take $\Sigma_A B$ to be $\Gamma.A . B$ and we take $\pi_\Gamma : \Sigma_A B \to \Gamma$ to be the composition of $\Gamma.A . B \xrightarrow{\pi_{\Gamma.A}} \Gamma. A  \xrightarrow{\pi_{\Gamma}} \Gamma$.
+
+    Then we take $\langle \rangle$ to be the identity, and we find that $ s^* (\Sigma_A B ) \cong \Sigma_{s^* A} (s ^* B)$ since they are both the pullback $s^* (\Gamma.A . B)$.
+\end{proof}
+
+\begin{theorem}
+    If $\D$ is closed under isomorphism and $(\C, \D)$ models strong $\Sigma$-types, then $\D$ is closed under composition.
+\end{theorem}
+\begin{proof}
+    Consider two composable display maps $\Gamma.A . B \xrightarrow{\pi_{\Gamma.A}} \Gamma. A  \xrightarrow{\pi_{\Gamma}} \Gamma$. Since their composition is isomorphic to $\pi_\Gamma : \Sigma_A B \to \Gamma$, we find that $\D$ is closed under composition.
+\end{proof}
+
+\subsection{Dependent product types}
+
+Consider the rules for the $\Pi$-types. The formation rule, which has the same form as the one for $\Sigma$-types, tells us that for any judgment of the form $\Gamma, A \vdash B \type$, there is a judgment of the form $\Gamma \vdash \Pi_A B \type$. Thus, semantically we interpret this as saying that for any pair of display maps $\Gamma.A . B \xrightarrow{d} \Gamma. A  \xrightarrow{e} \Gamma$, there is a display map $\pi(d,e) : \Pi_A B \to \Gamma$.
+
+We ask that this is stable under pullback/substitution. Thus, we ask that for any morphism $s : \Delta \to \Gamma$, we have an isomorphism $i_s: s^* \pi(d,e) \cong \pi(s^*d, s^*e)$ in $\C / \Delta$.
+
+The introduction rule tells us that given a judgement of the form $\Gamma, x: A \vdash b : B$, we obtain a judgment of the form $\Gamma \vdash \lambda x . b: \Pi_A B $. Semantically, this says that given a section of $d$, we get a section of $\pi$, as illustrated below.
+\[
+     \begin{tikzcd}
+         \Gamma.A.B \ar[d,"d"] & \Pi_A B \ar[d,"{\pi(d,e)}"']
+         \\ 
+         \Gamma.A \ar[r,"e"'] \ar[u,bend left]& \Gamma \ar[u, bend right, dotted]
+     \end{tikzcd}
+\]
+That is, we get a function $\lambda : \hom_{\C / \Gamma . A} (1, d) \to \hom_{\C / \Gamma} (1 , {\pi(d,e)})$.
+
+The elimination rule tells us that given a judgment of the form $\Gamma \vdash f : \Pi_A B$, we get $\Gamma, x : A \vdash f x : B $. Semantically, this corresponds to a function in the other direction: $\epsilon : \hom_{\C / \Gamma} (1 , {\pi(d,e)}) \to \hom_{\C / \Gamma . A} (1, d)$.
+
+The computation rule ($\beta$-rule) tells us that $\epsilon \lambda = 1$, and uniqueness ($\eta$-rule) tells us that $\lambda \epsilon = 1$. Thus, we have an isomorphism 
+\[ \lambda : \hom_{\C / \Gamma . A} (1, d) \to \hom_{\C / \Gamma} (1 , {\pi(d,e)}).\]
+
+We also ask that this operation is stable under substitution/pullback and that substitution/pullback is functorial. That is, we ask that the following diagrams commute for any $s : \Delta \to \Gamma$ and $t: \Epsilon \to \Delta$.
+\[
+     \begin{tikzcd}
+        \hom_{\C / \Gamma . A} (1, d)  \ar[dd,"s^*"] \ar[r, "\lambda"] & \hom_{\C / \Gamma} (1 , {\pi(d,e)}) \ar[d,"s^*"]
+         \\
+         & \hom_{\C / \Delta} (1 , s^* {\pi(d,e)})
+         \ar[d,"i"]
+         \\
+         \hom_{\C / s^*(\Delta . A)} (1, s^* d) \ar[r,"\lambda"] & \hom_{\C / \Delta} (1 ,  {\pi(s^*d,s^*e)})
+     \end{tikzcd}
+\]
+\[
+     \begin{tikzcd}
+        \hom_{\C / \Gamma . A} (1, d) \ar[d,"\cong"] \ar[rr, "\lambda"] &&  \hom_{\C / \Gamma} (1 , {\pi(d,e)}) \ar[d,"\cong"]
+        \\
+        \hom_{\C / \Gamma.A} (1, 1_{\Gamma}^* d) \ar[r,"\lambda"] & \hom_{\C / \Gamma} (1 , {\pi(1_\Gamma^* d,1_\Gamma^* e)}) \ar[r,"i^{-1}"] & \hom_{\C / \Delta} (1 ,  1_\Gamma^* {\pi(d,e)})
+     \end{tikzcd}
+\]
+\[
+     \begin{tikzcd}[column sep=small]
+        \hom_{\C / (st)^*(\Gamma . A)} (1, (st)^*d) \ar[d,"\cong"] \ar[r, "\lambda"] &
+        \hom_{\C / \Epsilon} (1 , {\pi((st)^*d,(st)^*e)})  \ar[r,"i^{-1}"]
+        &  \hom_{\C / \Gamma} (1 , (st)^* \pi(d,e)) \ar[d,"\cong"]
+        \\
+        \hom_{\C / t^* s^* (\Gamma . A)} (1, t^* s^*d)  \ar[r, "\lambda"] &
+        \hom_{\C / \Epsilon} (1 , {\pi(t^* s^*d,t^* s^*e)})  \ar[r,"i^{-1}"]
+        &  \hom_{\C / \Gamma} (1 , t^* s^* \pi(d,e)) 
+     \end{tikzcd}
+\]
+However, notice that the second diagram above is an instance of the first.
+
+
+
+\begin{definition}
+    Say that $(\C, \D)$ \emph{models $\Pi$-types} if 
+    \begin{itemize}
+        \item for any pair of display maps $\Gamma.A . B \xrightarrow{d} \Gamma. A  \xrightarrow{e} \Gamma$, there is a display map $\pi(d,e) : \Pi_A B \to \Gamma$
+        \item together with an isomorphism $i_s : s^* \pi(d,e) \cong \pi(s^*d, s^*e)$ in $\C / \Delta$ for any morphism $s : \Delta \to \Gamma$ and
+        \item a bijection
+        \[ \lambda : \hom_{\C / \Gamma . A} (1, d) \to \hom_{\C / \Gamma} (1 , {\pi(d,e)})\]
+        \item making the following diagrams commute for any $s : \Delta \to \Gamma$, $t : \Epsilon \to \Delta$.
+        \[
+     \begin{tikzcd}
+        \hom_{\C / \Gamma . A} (1, d) \ar[r," "] \ar[dd,"s^*"] \ar[r, "\lambda"] & \hom_{\C / \Gamma} (1 , {\pi(d,e)}) \ar[d,"s^*"]
+         \\
+         & \hom_{\C / \Delta} (1 , s^* {\pi(d,e)})
+         \ar[d,"i_*"]
+         \\
+         \hom_{\C / s^*(\Delta . A)} (1, s^* d) \ar[r,"\lambda"] & \hom_{\C / \Delta} (1 ,  {\pi(s^*d,s^*e)})
+     \end{tikzcd}
+\]
+\[
+     \begin{tikzcd}[column sep=small]
+        \hom_{\C / (st)^*(\Gamma . A)} (1, (st)^*d) \ar[d,"\cong"] \ar[r, "\lambda"] &
+        \hom_{\C / \Epsilon} (1 , {\pi((st)^*d,(st)^*e)})  \ar[r,"i^{-1}"]
+        &  \hom_{\C / \Gamma} (1 , (st)^* \pi(d,e)) \ar[d,"\cong"]
+        \\
+        \hom_{\C / t^* s^* (\Gamma . A)} (1, t^* s^*d)  \ar[r, "\lambda"] &
+        \hom_{\C / \Epsilon} (1 , {\pi(t^* s^*d,t^* s^*e)})  \ar[r,"i^{-1}"]
+        &  \hom_{\C / \Gamma} (1 , t^* s^* \pi(d,e)) 
+     \end{tikzcd}
+\]
+    \end{itemize}
+\end{definition}
+
+\begin{definition}
+    Say that $(\C, \D)$ is \emph{closed under local exponentials} if for every composable pair of display maps $\Gamma.A . B \xrightarrow{d} \Gamma. A  \xrightarrow{e} \Gamma$, there is a display map $\pi(d,e) : \Pi_A B \to \Gamma$ together with the following universal property.
+    \[ \hom_{\C / \Gamma . A} (e^* s,  d) \cong \hom_{\C / \Gamma} (s, {\pi(d,e)}) \]
+\end{definition}
+
+\begin{theorem}
+    We have that $(\C, \D)$ is closed under local exponentials if and only if it models $\Pi$-types.
+\end{theorem}
+
+\begin{proof}
+Suppose first that $(\C, \D)$ is closed under local exponentials.
+Then for any pair of display maps $\Gamma.A . B \xrightarrow{d} \Gamma. A  \xrightarrow{e} \Gamma$, there is a display map $\pi(d,e) : \Pi_A B \to \Gamma$.
+
+For any $t : \Epsilon \to \Delta$, we have that
+\begin{align*}
+    \hom_{\C / \Delta} (t, s^* {\pi(d,e)}) &\cong \hom_{\C / \Gamma} (st, {\pi(d,e)}) \\
+    &\cong \hom_{\C / \Gamma . A} (e^* (st), d) \\
+    &\cong \hom_{\C / s^* (\Gamma . A)} ((s^* e)^* t, s^* d) \\
+    &\cong \hom_{\C / \Delta}(t, \pi(s^* d, s^* e))
+\end{align*}
+(where the first and third bijections are by the universal property of pullback and the second and fourth are from the universal property of $\pi$)
+so by the Yoneda lemma, we find that $s^* {\pi(d,e)} \cong \pi(s^* d, s^* e)$.
+
+We find $\lambda$ as a special case of the universal property of $\pi(d,e)$ (i.e., when $s := 1_\Gamma$).
+
+The naturality of the universal property for $\pi$ makes the required diagrams for $\lambda$ commute.
+
+
+Suppose now that $(\C, \D)$ models $\Pi$-types.
+ 
+Notice that because we have such a $\lambda$ for each composable pair of display maps, we can use the pair $s^* (\Gamma.A . B) \xrightarrow{s^* d} s^* (\Gamma. A)  \xrightarrow{s^* e} \Delta$ for any $s : \Delta \to \Gamma$ and obtain a bijection $\lambda_s : \hom_{\C / s^*(\Gamma . A)} (1, s^* d) \xrightarrow{\lambda} \hom_{\C / \Delta} (1 , {\pi(s^* d,s^* e)}) $.
+Now we let $\lambda'_s$ denote the following composition of bijections
+\begin{align*}
+    \hom_{\C / \Gamma . A} (e^* s,  d) &\cong
+    \hom_{\C / s^*(\Gamma . A)} (1, s^* d) 
+    \\&\xrightarrow{\lambda_s} \hom_{\C / \Delta} (1 , {\pi(s^* d,s^* e)})\\
+     &\xrightarrow{(i^{-1})_*} \hom_{\C / \Delta} (1 , s^* {\pi( d, e)}) \\
+     &\cong \hom_{\C / \Gamma} (s, {\pi(d,e)})
+\end{align*}
+where the unlabelled bijections use the universal property of pullback.
+The naturality of $\lambda_s'$ follows from the required commutative squares for $\lambda$.
+\end{proof}
+
+\subsection{Identity types}
+
+Consider the rules for $\Id$-types.
+
+The formation rule tells us that for any judgement of the form $\Gamma \vdash A \type$, we have a judgment of the form $\Gamma, x : A, y : A \vdash \Id_A(x,y)$.
+We interpret this as saying that for any display map $\Gamma . A \to \Gamma$, there is a display map $\Id(A) \to \Gamma . A . A$, where $\Gamma. A . A$ is the pullback of $\Gamma . A \to \Gamma$ along itself (i.e. weakening).
+
+The introduction rule tells us that there is a judgment $\Gamma, x : A \vdash r_x : \Id_A (x,x)$.
+This corresponds to a morphism $r_A : \Gamma . A \to \Id(A)$ making the following diagram commute.
+\[
+     \begin{tikzcd}
+          & \Id(A) \ar[d] \\
+          \Gamma . A \ar[ru,"r"] \ar[r,"\delta"] & \Gamma.A.A
+     \end{tikzcd}
+\]
+In the above diagram, $\delta$ denotes the diagonal morphism induced by the universal property of $\Gamma.A.A$.
+
+The elimination rule says that for every pair of judgments $\Gamma, x : A, y : A, p : \Id_A(x,y) \vdash D(x,y,p)$ and $\Gamma, x : A \vdash d : D(x,x,r_x)$, there is a judgment $\Gamma, x : A, y : A, p : \Id_A(x,y) \vdash \overline d : D(x,y,p)$. Semantically, given a solid commuting diagram as below where $\pi$ is a display map, there is a dotted arrow making the lower triangle commute.
+\[
+     \begin{tikzcd}
+         A \ar[r,"d"] \ar[d,"r_A"] & D \ar[d,"\pi"]
+         \\ 
+         \Id(A) \ar[r,equal] \ar[ur,"\overline d", dotted] & \Id(A)
+     \end{tikzcd}
+\]
+The computation rule says exactly that the upper triangle commutes.
+
+\begin{definition}
+    Consider a category $\C$ with two morphisms $c: A \to B$ and $f: X \to Y$. Say that $f$ has the \emph{right lifting property with respect to $c$} (resp. that $c$ has the \emph{left lifting property with respect to $f$}) if for every $x : A \to X$ and $y : B \to Y$ making the solid square below commute, there is a morphism $\ell: B \to X$ making the whole diagram commute.
+    \[
+         \begin{tikzcd}
+             A \ar[r,"x"] \ar[d,"c"] & X \ar[d,"f"]
+             \\ 
+             B \ar[r,"y"] \ar[ur,"\ell",dotted] & Y
+         \end{tikzcd}
+    \]
+    We say that a square such as the above solid square is a \emph{lifting problem}, and such an $\ell$ is a \emph{solution}. We write $c \boxslash f$.
+
+    Given a classes $\A$ and $\D$ of morphisms of $\C$, we write $\A \boxslash \C$ and say that $\A$ has the \emph{left lifting property with respect to $\C$} or that $\C$ has the \emph{right lifting property with respect to $\A$} if $c \boxslash f$ for every $c \in \A$ and $f \in \D$.
+
+    Given a class $\A$, we write $\A^\boxslash$ for the class of morphisms $f$ such that $c \boxslash f$ for every $c \in \A$. That is, $\A^\boxslash$ is the largest class such that $\A \boxslash \A^\boxslash$. Dually, given a class $\D$, we write $^\boxslash \D$ for class of morphisms $c$ such that $c \boxslash f$ for every $f \in \D$.
+\end{definition}
+
+\begin{theorem}
+    \label{thm:saturation}
+    Consider a category $\C$ with all finite limits and a class $\A$ of morphisms of $\C$. Then $\A^\boxslash$ has the following properties.
+    \begin{enumerate}
+        \item $\D$ is closed under isomorphisms,
+        \item $\D$ contains all isomorphisms,
+        \item $\D$ is closed under composition,
+        \item $\D$ is stable under pullbacks.
+    \end{enumerate}
+\end{theorem}
+\begin{proof}
+    (HW 3)
+\end{proof}
+
+\begin{lemma}
+    Every morphism $r_A: A \to \Id(A)$ has the left lifting property against every display map.
+\end{lemma}
+\begin{proof}
+    We want to produce a lift in any square of the following form, where $p$ is a display map.
+    \[
+         \begin{tikzcd}
+             A \ar[r,"x"] \ar[d,"r_A"] & E \ar[d,"p"]
+             \\ 
+             \Id(A) \ar[r,"y"] & B
+         \end{tikzcd}
+    \]
+    We take the pullback of $p$ and $y$ to produce the following diagram.
+    \[
+        \begin{tikzcd}
+            A \ar[rr,"x", bend left] \ar[d,"r_A"] \ar[r, dashed] & \bullet \pullback \ar[r] \ar[d] & E \ar[d,"p"]
+            \\ 
+            \Id(A) \ar[rr,"y"', bend right] \ar[r,equal] \ar[ur, dotted] & \Id(A) \ar[r, "y"] & B
+        \end{tikzcd}
+   \]
+   The dashed arrow is induced by the universal property of the pullback. Since the pullback of $p$ is a display map, the existence of the dotted arrow making the diagram commute is ensured by the elimination and computation rules of the identity type. One can check that the composition of arrows $\Id(A) \to E$ in the above diagram is indeed a solution to the original lifting problem.
+\end{proof}
+
+Thus, to ask for a model of $\Id$-types (ignoring the requirement that it is stable under pullback) is to ask that in any slice $\C / \Gamma$, a display map $A$ (that is, an object of $\C / \Gamma$ that is an element of $\D$) has a factorization 
+\[ A \xrightarrow{r_A} \Id(A) \xrightarrow{\epsilon_A} A \times A \] 
+where $\epsilon_A$ is a display map and such that $r_A$ has the left lifting property against all display maps (note that the product $A \times A$ in $\C / \Gamma$ is the pullback, i.e. weakening, of the morphism $A$ along itself in $A$). 
+
+To ask that this is stable under pullback in the weakest sense allowed by the strictification theorem of \cite{lumsdaine-warren} is to ask that this structure is stable under pullback. 
+That is, for any $s: \Delta \to \Gamma$, 
+(1) $s^* r_A  , s^* \epsilon_A$ gives a factorization of $s^* A \to s^* A \times s^* A$, 
+(2) $s^* \epsilon_A$ is a display map, and 
+(3) $s^* r_A$ lifts against any display map.
+
+\begin{exercise}
+    Check that requirements (1) and (2) of the above stability are automatic.
+\end{exercise}
+
+\begin{definition}
+    Say that a category $\C$ with display maps $\D$ \emph{has identity types} if for every object $\Gamma$ of $\C$ and for every display map $A$ in $\C / \Gamma$, we have a factorization
+    \[ A \xrightarrow{r_A} \Id(A) \xrightarrow{\epsilon_A} A \times A \] 
+    such that any pullback of $r_A$ lifts against all display maps and $\epsilon_A$ is a display map.
+\end{definition}
+
+A model of identity types is equivalent to a certain kind of \emph{weak factorization system}, a structure that is a cornerstone of categorical homotopy theory.
+
+\begin{definition}
+    Consider a category $\C$ with two classes of morphisms $\mathcal L, \mathcal R$. The pair $(\mathcal L, \mathcal R)$ is a \emph{weak factorization system} if
+    \begin{enumerate}
+        \item $\mathcal L = ^\boxslash \mathcal R$
+        \item $\mathcal R = \mathcal L^\boxslash$
+        \item every map $f: X \to Y$ of $\C$ has a factorization
+        \[
+             \begin{tikzcd}
+                 X \ar[dr, "\lambda_f"] \ar[rr,"f"]& & Y \\
+                   & Mf \ar[ur,"\rho_f"]
+             \end{tikzcd}
+        \]
+        where $\lambda_f \in \mathcal L$, $\rho_f \in \mathcal R$.
+    \end{enumerate}
+\end{definition}
+
+\begin{definition}
+    A \emph{path object} for an object $A$ is an object $\Path A$ equipped with the morphisms $r_A, \epsilon_A$ making the following diagram commute.
+    \[
+             \begin{tikzcd}
+                 A \ar[dr, "r_A"] \ar[rr,"\Delta_A"]& & A \times A \\
+                   & \Path A \ar[ur,"\epsilon_A"]
+             \end{tikzcd}
+        \]
+
+    We get path objects in any weak factorization system with binary products. We factor the diagonal $\Delta_A$ of any object $A$ to get the following.
+    \[
+             \begin{tikzcd}
+                 A \ar[dr, "\lambda_\Delta"] \ar[rr,"\Delta_A"]& & A \times A \\
+                   & M\Delta_A \ar[ur,"\rho_\Delta"]
+             \end{tikzcd}
+        \]
+    To make it clear whenever the path objects we are considering are obtained in this way, we will call them \emph{path objects in a/the weak factorization system}.
+
+    A choice of path objects $A \mapsto \Path A$ for each object $A$ is \emph{coherent} when for each $f: A \to B$ there is a morphism $\Path f : \Path A \to \Path B$ that commutes with $r$ and $\epsilon$.
+
+    A choice of path objects is \emph{functorial} when $A \mapsto \Path A$ is an endufunctor and $r$ and $\epsilon$ are natural transformations.
+
+    Say that a choice of path objects is \emph{nice} when each $r_A$ has the left lifting property against each $\epsilon_B$.
+\end{definition}
+
+\begin{example}
+    The identity type gives us a coherent choice of path object for every display map in every $\C / \Gamma$.
+\end{example}
+
+\begin{exercise}
+    Check that for path objects,
+    \begin{enumerate}
+        \item nice implies coherent,
+        \item functorial implies coherent,
+        \item path objects in a weak factorization system are nice, and
+        \item the path objects given by a model of the identity type are nice.
+    \end{enumerate}
+\end{exercise}
+
+\begin{example}
+    In groupoids, we have functorial path objects given by taking a groupoid $A$ to the groupoid $A^\to$.
+\end{example}
+
+\begin{example}
+    In topological spaces, we have functorial path objects given by taking a space $A$ to the \emph{Moore path space $\Gamma A$ on $A$}. This has underlying set $\{ (f, r) \in (\mathbb R^+ \to A ) \times \mathbb R^+ \ | \ f(s) = f(r) \ \forall s \geq r \}$ where $\mathbb R^+$ denotes the nonnegative real numbers. Not only is $\Gamma$ a functor, but it is part of a monad.
+\end{example}
+
+\begin{example}
+    In Kan complexes, we have functorial path objects given by taking a space $A$ to $A^{\Delta_1}$, where $\Delta_1$ denotes the Yoneda embedding of the object $1$.
+\end{example}
+
+A \emph{pseudo-relation} on an object $A$ of category consists of an object $R$ with a morphism $\rho: R \to A \times A$. (If $\rho$ is monic, then this is simply called a relation on $A$; all relations here are pseudo, so we will also omit this adjective from here). One can define notions of reflexive, symmetric, transitive, and equivalence pseudo-relations.
+
+\begin{lemma}
+    \label{lem:equivalence relation}
+    Nice path objects give reflexive and symmetric relations.
+
+    If $\C$ has all pullbacks and if there are classes of morphisms $\mathcal L, \mathcal R$ such that (1) each $r_A \in \mathcal L$, (2) each $\epsilon_B \in \mathcal R$, (3) $\mathcal R$ is stable under pullback and closed under composition, (4) $\mathcal L$ is stable under pullback along $\mathcal R$, (5) each morphism to the terminal object is in $\mathcal R$, and (6) $\mathcal L \boxslash \mathcal R$, then we get an equivalence relation.
+\end{lemma}
+
+\begin{proof}
+    (HW4)
+\end{proof}
+
+\begin{lemma}
+    \label{lem:factorization}
+    Consider a weak factorization system $(\mathcal L, \mathcal R)$ on a category $\C$. We have that $\mathcal L$ is the class of all maps $f: X \to Y$ for which the following lifting problem has a solution.
+    \[
+         \begin{tikzcd}
+             X \ar[r,"\lambda_f"] \ar[d,"f"] & Mf \ar[d,"\rho_f"]
+             \\ 
+             Y \ar[r,equal] & Y
+         \end{tikzcd}
+         \tag{$*$}
+    \]
+
+    Dually, $\mathcal R$ is the class of all maps $f: X \to Y$ for which the following lifting problem has a solution.
+    \[
+         \begin{tikzcd}
+             X \ar[r,equal] \ar[d,"\lambda_f"] & X \ar[d,"f"]
+             \\ 
+             Mf \ar[r,"\rho_f"] & Y
+         \end{tikzcd}
+         \tag{$**$}
+    \]
+\end{lemma}
+\begin{proof}
+    (HW 4)
+\end{proof}
+
+\begin{definition}
+    Consider a factorization $f \mapsto (\lambda_f, \rho_f)$ of all morphisms in a category $\C$.
+    
+    Say that it is \emph{coherent} if given a morphism of morphisms, as the solid diagram below depicts, we obtain a dashed arrow making the diagram commute.
+    \[
+         \begin{tikzcd}
+             X \ar[r,"\lambda_f"] \ar[d,"x"] & Mf \ar[d,"{M\langle x , y \rangle}", dashed] \ar[r,"\rho_f"] & Y \ar[d,"y"]
+             \\ 
+             X' \ar[r,"\lambda_{f'}"] & Mf' \ar[r,"\rho_{f'}"] & Y'
+         \end{tikzcd}
+    \]
+
+    Say that a factorization is \emph{functorial} if it is the object part of a section of the functor $\circ : \C^{\to \to} \to \C^\to$ where $\to$ is the category with two objects $0,1$ and one morphism $0 \to 1$, $\to \to$ is the category generated by three objects $0$, $1$, $2$ and morphisms $0 \to 1, 1 \to 2$, and $\circ : \C^{\to \to} \to \C^\to$ is the functor that composes two composable arrows.
+\end{definition}
+
+\begin{exercise}
+    Check that a functorial factorization is coherent.
+\end{exercise}
+
+\begin{lemma}
+    \label{lem:generate-wfs}
+    Consider any coherent factorization $f \mapsto (\lambda_f, \rho_f)$.
+    Let $\mathcal L$ denote the class of all maps $f: X \to Y$ for which $(*)$ has a solution, and let $\mathcal R$ denote the class of all maps $f: X \to Y$ for which $(**)$ has a solution. Suppose that each $\lambda_f \in \mathcal L$ and each $\rho_f \in \mathcal R$.
+
+     Then $(\mathcal L, \mathcal R)$ is a weak factorization system.
+\end{lemma}
+
+\begin{proof}
+    This is a slight generalization of \Cref{lem:factorization}.
+\end{proof}
+
+\begin{definition}
+    Given a choice of path object $\Path A$ for each object $A$, we can produce a \emph{mapping path space} factorization on the category.
+
+    We take a morphism $f: X \to Y$ to the following factorization
+    \[
+         \begin{tikzcd}
+             X \ar[r,"\lambda_f"] & X \times_\bullet \Path Y \ar[r,"\epsilon_f"] & Y
+         \end{tikzcd}
+    \] 
+    where $X \times_\bullet \Path Y$ is the following pullback
+    \[
+         \begin{tikzcd}
+            X \times_\bullet \Path Y \ar[r," "] \ar[d," "] \pullback & \Path Y \ar[d,"\pi_0 \epsilon "]
+             \\ 
+             X \ar[r,"f "] & Y
+         \end{tikzcd}
+    \]
+    The map $\epsilon_f$ is given by projecting to $\Path Y$ and then taking $\pi_1 \epsilon$. The map $\lambda_f$ is induced by $1_X$ and $r_Y f$.
+\end{definition}
+
+\begin{exercise}
+    Check that coherent (resp. functorial) path objects produce coherent (resp. functorial) mapping path space factorizations.
+\end{exercise}
+
+\begin{example}
+    The mapping path space factorization in groupoids fulfills the hypotheses of \Cref{lem:generate-wfs}. The left class consists of those maps which are equivalences and injective on objects. The right class consists of those maps which are isofibrations.
+\end{example}
+
+\begin{example}
+    The mapping path space factorization in topological spaces fulfills the hypotheses of \Cref{lem:generate-wfs}. The left class consists of those maps which are homotopy equivalences and have the homotopy extension property. The right class consists of those maps which have the homotopy lifting property.
+\end{example}
+
+\begin{example}
+    The mapping path space factorization in Kan complexes fulfills the hypotheses of \Cref{lem:generate-wfs}. The left class consists of those maps which are monic and homotopy equivalences. The right class consists of those maps which are Kan fibrations.
+\end{example}
+
+\begin{definition}
+    Consider a weak factorization system $(\mathcal L, \mathcal R)$ on a category $\C$ with a terminal object. Say that \emph{every object is fibrant} if all morphisms to the terminal object are in $\mathcal R$. Say that the weak factorization system is \emph{Frobenius} if $\mathcal L$ is stable under pullback along $\mathcal R$. Say that a weak factorization system is \emph{type theoretic} if all objects are fibrant and $\mathcal L$ is stable under pullback along $\mathcal R$.
+\end{definition}
+
+\begin{exercise}
+    Check that path objects in a type theoretic weak factorization system satisfy the hypotheses of \Cref{lem:equivalence relation}.
+\end{exercise}
+
+\begin{theorem}[\cite{gambino-garner}]
+    Consider a category $\C$ with a terminal object, display maps $\D$, and identity types. 
+
+    Then the mapping path space factorization produces a type theoretic weak factorization system $(^\boxslash\D, ({^\boxslash}\D)^\boxslash)$ in the sense of \Cref{lem:generate-wfs}.
+\end{theorem}
+
+\begin{theorem}[\cite{north}]
+    The path objects in any type theoretic weak factorization system model identity types.
+\end{theorem}
+
+\begin{theorem}[\cite{north}]
+    A weak factorization system is type theoretic if and only if its factorization can be given as the mapping path space factorization generated by path objects in it.
+\end{theorem}
+
+\begin{lemma}
+    Consider a weak factorization system on a category with a terminal object and whose factorization can be given as a mapping path space factorization. Then all objects are fibrant.
+\end{lemma}
+\begin{proof}
+    \hl{[fill in]}
+\end{proof}
+
+
+
+\begin{exercise}
+    A weak factorization system may have many potential factorizations. For instance, we might start with a factorization $(\lambda_0, \rho_0)$ and then take the mapping path factorization built out of that to get a new factorization $(\lambda_1, \rho_1)$, etc. to get $(\lambda_n, \rho_n)$.
+
+    Give an explicit description for $(\lambda_n, \rho_n)$.
+\end{exercise}
+
+
+
+\bibliographystyle{alpha}
+\bibliography{literature}
+
+\end{document}

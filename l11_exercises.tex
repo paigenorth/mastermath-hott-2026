@@ -1,0 +1,174 @@
+\documentclass{article}
+
+\usepackage{amsthm,amsfonts}
+\usepackage{mathpartir}
+\usepackage{mathtools}
+\usepackage{tikz-cd}
+\usepackage{hyperref,cleveref}
+\usepackage{color,soul}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+
+\theoremstyle{theorem}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{corollary}{Corollary}[section]
+\newtheorem{problem}{Problem}[section]
+\newtheorem{exercise}{Exercise}[section]
+\newenvironment{construction}{\begin{proof}[Construction]}{\end{proof}}
+
+
+
+\newcommand{\types}{\mathcal T}
+% \newcommand{\type}{\textsc{type}}
+\newcommand{\terms}{\mathcal S}
+% \newcommand{\contexts}{\mathcal C}
+% \newcommand{\context}{\textsc{ctx}}
+\newcommand{\T}{\mathbb T}
+\newcommand{\C}{\mathcal C}
+\newcommand{\D}{\mathcal D}
+\newcommand{\Set}{{\mathcal S}et}
+\newcommand{\syncat}[1]{\C [#1]}
+% \newcommand{\defeq}{\coloneqq}
+% \newcommand{\interp}[1]{\lceil #1 \rceil}
+\newcommand{\seq}{\doteq}
+% \newcommand{\lists}{\mathcal Lists}
+% \newcommand{\variables}{\mathcal Var}
+\newcommand{\Epsilon}{\mathrm E}
+\newcommand{\Zeta}{\mathrm Z}
+\newcommand{\mor}{\mathrm {mor}}
+\newcommand{\op}{\mathrm {op}}
+
+
+
+
+\title{Semantics of HoTT \\ Lecture Notes}
+\author{Paige Randall North}
+
+
+
+\begin{document}
+
+\maketitle
+
+\section{Syntactic categories}
+
+Consider a Martin-Löf type theory $\T$. By a Martin-Löf type theory, we mean a type theory with the structural rules of Martin-Löf type theory \cite{hofmann}; we are agnostic about which type formers are included in $\T$.
+
+\begin{definition}
+    The \emph{syntactic category of $\T$} is the category, denoted $\syncat{\T}$, consisting of the following.
+    \begin{itemize}
+        \item The objects are the contexts of $\T$.\footnote{These are given up to judgmental equality in $\T$: i.e., if $\Gamma \seq \Delta$ as contexts, then $\Gamma = \Delta$ as objects.}
+        \item The morphisms are the \emph{context morphisms}. A \emph{context morphism} $f : \Gamma \to \Delta$ consists of terms
+        \begin{align*}
+            \Gamma &\vdash f_0 : \Delta_0 \\
+            \Gamma &\vdash f_1 : \Delta_1[f_0 / y_0] \\
+            \vdots \\
+            \Gamma &\vdash f_n : \Delta_n [f_0 / y_0] [f_1 / y_1] \cdots [f_{n-1} / y_{n-1}]
+        \end{align*}
+        where $\Delta = (y_0 : \Delta_0 , y_1 : \Delta_1, ... , y_n : \Delta_n)$.\footnote{These morphisms are given up to judgmental equality in $\T$: i.e., if $f_0 \seq g_0 : \Delta_0, ..., f_n \seq g_n : \Delta_n [\delta_0 / y_0] \cdots [\delta_{n-1} / y_{n-1}]$, then $f = g$ as morphisms.}
+        \item Given an object/context $\Gamma$, the identity morphism $1_\Gamma : \Gamma \to \Gamma$ consists of \hl{[fill in the blank]}
+        \item Given morphisms $f: \Gamma \to \Delta$ and $g: \Delta \to \Epsilon$, the composition $g \circ f$ is given by \hl{[fill in the blank]}
+    \end{itemize}
+    Now we show that left unitality, right unitality, and associativity are satisfied.
+    \begin{itemize}
+        \item \hl{[fill in the blank]}
+        \item \hl{[fill in the blank]}
+        \item \hl{[fill in the blank]}
+    \end{itemize}
+\end{definition}
+
+We think of $\syncat{\T}$ as the syntax of $\T$, arranged into a category.
+
+\begin{lemma}
+    The empty context is the terminal object of $\syncat{\T}$.
+\end{lemma}
+\begin{proof}
+    \hl{[fill in the blank]}
+\end{proof}
+
+\section{Display map categories}
+
+\begin{definition}
+    Let $\C$ be a category, and consider a subclass $\D \subseteq \mor (\C)$. $\D$ is a \emph{display structure} \cite{taylor} if for every $d : \Gamma \to \Delta$ in $\D$ and every $s: \Epsilon \to \Delta$ in $\C$, there is a given pullback $s^* d \in \D$.
+
+    We call the elements of $\D$ \emph{display maps}.
+\end{definition}
+
+In the syntactic category $\syncat{\T}$, we are often interested in objects of the form $\Gamma, z: A$ for a context $\Gamma$ and a type $A$; these are often written as $\Gamma.A$. We are then often interested in morphisms of the form $\pi_\Gamma : \Gamma.A \to \Gamma$ where each component of $\pi_\Gamma$ is given by the variable rule. We think of such a morphism as representing the type $A$ in context $\Gamma$.
+
+\begin{theorem}\label{thm:syn-display}
+    The class of maps of the form $\pi_\Gamma : \Gamma.A \to \Gamma$ form display structure in the syntactic category $\syncat{\T}$.
+\end{theorem}
+\begin{proof}
+    \hl{[fill in the blank]}
+\end{proof}
+
+\begin{definition}
+    Let $\C$ be a category, and consider a subclass $\D \subseteq \mor (\C)$. $\D$ is a \emph{class of displays} if $\D$ is stable under pullback.
+\end{definition}
+
+\begin{lemma}
+    Any class of displays is closed under isomorphism.
+\end{lemma}
+\begin{proof}
+    \hl{[fill in the blank]}
+\end{proof}
+
+\begin{corollary}[to \Cref{thm:syn-display}]
+    Let $\D$ denote the closure under isomorphism of the class of maps of the form $\pi_\Gamma : \Gamma.A \to \Gamma$ in $\syncat{\T}$. Then $\D$ is a class of displays.
+\end{corollary}
+\begin{proof}
+    \hl{[fill in the blank]}
+\end{proof}
+
+Now suppose that we close the class of maps of the form $\pi_\Gamma : \Gamma.A \to \Gamma$ under composition. This is then the class of maps of the form $\pi_\Gamma : \Gamma, \Delta \to \Gamma$ where $\Gamma$ and $\Delta$ are arbitrary contexts.
+
+\begin{lemma}\label{lem:syn-clan}
+    Now let $\D$ denote the class of maps of the form $\pi_\Gamma : \Gamma, \Delta \to \Gamma$ in $\syncat{\T}$. Then
+    \begin{enumerate}
+        \item $\D$ is closed under composition,
+        \item $\D$ contains all the maps to the terminal object,
+        \item every identity is in $\D$
+    \end{enumerate} 
+\end{lemma}
+\begin{proof}
+    \hl{[fill in the blank]}
+\end{proof}
+
+\begin{definition}
+    A clan \cite{joyal} is a category $\C$ with a terminal object $*$ and a distinguished class $\D$ of maps such that
+    \begin{enumerate}
+        \item $\D$ is closed under isomorphisms,
+        \item $\D$ contains all isomorphisms,
+        \item $\D$ is closed under composition,
+        \item $\D$ is stable under pullbacks, and
+        \item $\D$ contains all maps to the terminal object.
+    \end{enumerate}
+    Note that the first requirement follows from the others.
+\end{definition}
+
+\begin{theorem}\label{thm:syn-clan}
+    Let $\mathcal D$ denote the closure under isomorphism of morphisms of the form $\pi_\Gamma : \Gamma, \Delta \to \Gamma$ in $\syncat{\T}$. This is a clan.
+\end{theorem}
+\begin{proof}
+    \hl{[fill in the blank]}
+\end{proof}
+
+The presence of $\Sigma$-types and a unit type allows us to conflate contexts and types.
+
+\begin{theorem}
+    If $\T$ has $\Sigma$-types (with both computation/$\beta$ and uniqueness/$\eta$ rules \cite{nlab}) and a unit type, then the closure under isomorphism of the class of maps of the form $\pi_\Gamma : \Gamma. A \to \Gamma$ constitutes a clan (and indeed, is the same class as in \Cref{thm:syn-clan}).
+\end{theorem}
+\begin{proof}
+    \hl{[fill in the blank]}
+\end{proof}
+
+
+
+\bibliographystyle{alpha}
+\bibliography{literature}
+
+\end{document}
+
