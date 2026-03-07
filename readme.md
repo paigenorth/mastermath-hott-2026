@@ -35,3 +35,38 @@ Exercises can be done on paper or using the UniMath library in the Coq proof ass
   [VsCoq 2](https://github.com/coq-community/vscoq) and the
   [coq-lsp](https://github.com/ejgallego/coq-lsp/) language servers,
   respectively.
+
+7. Installing UniMath using [Nix](https://nixos.org/). The following instructions will assume familiarity with the Nix package manager.
+
+   UniMath is not currently available in [nixpkgs](https://github.com/NixOS/nixpkgs/), and the only derivation I could find online was more than 11 years old. Thankfully, nixpkgs does contain infrastructure for building Rocq packages (see [the relevant section of the nixpkgs manual](https://nixos.org/manual/nixpkgs/unstable/index.html#sec-language-rocq) for reference). Indeed, one can build a copy of UniMath using the following derivation:
+
+   ```nix
+   { mkCoqDerivation, coq }:
+   mkCoqDerivation {
+     pname = "UniMath";
+     owner = "UniMath";
+     version = "v20250923";
+     release."v20250923".sha256 = "sha256-NFBK/0ghMNxOZaLDjcToAUGyQnKT7KflLjTxFh7/4JQ=";
+     nativeBuildInputs = [ coq ];
+   }
+   ```
+
+   Instead of installing UniMath as a standalone package, one should prefer using `pkgs.coq.withPackages` (thus ensuring things like language servers have access to the library). As an example, one can make a UniMath-enabled rocq installation available together with the `vsrocq-language-server` (for use with things like the aforementioned [vscoq.nvim](https://github.com/tomtomjhj/vscoq.nvim) Neovim plugin) by using a Nix shell like the following:
+
+   ```nix
+   pkgs.mkShell {
+     packages = [
+       (pkgs.coq.withPackages (
+         ps: with ps; [
+           # Replace `import ./uni-math.nix` with any expression that evaluates to the
+           # derivation above. For example, one could keep the derivation as part of
+           # the same file by using a `let uni-math = ...; in ...` block.
+           (callPackage (import ./uni-math.nix) { })
+           vsrocq-language-server
+         ]
+       ))
+     ];
+   }
+   ```
+
+   Note that the above might take a fair bit to build the first time around (about an hour on my laptop).
