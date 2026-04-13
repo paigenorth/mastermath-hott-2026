@@ -1,7 +1,7 @@
 Require Export UniMath.Foundations.All.
 Require Export UniMath.CategoryTheory.All.
 
-(* Instructions: do Exercises 1 and 2 here in UniMath. Do Exercise 3 in LaTeX. No exercise should be done both in UniMath and LaTeX. As usual, you will submit one .v file and one .pdf file.*)
+(* Instructions: do Exercises 1, 2 and 3 here in UniMath. Do Exercise 4 in LaTeX. No exercise should be done both in UniMath and LaTeX. As usual, you will submit one .v file and one .pdf file.*)
 
 (* You can use anything proven in previous exercises or homework, and
 `impred_isaprop`, `funextsec`, `weqtopaths`, `isweqtoforallpathsAxiom`, `toforallpaths`, `isweqhomot`, `twooutof3c`,
@@ -70,13 +70,3 @@ Proof.
   Use the definition for isofibration and any results from the nLab page https://ncatlab.org/nlab/show/isofibration. Hint: use Prop 3.1.
   *)
 
-
-(* Extra credit *)
-
-(* Watch a talk from the HoTT/UF workshop happening 15-16 April. Write ~200 words reporting on what it was about and what you learned. The link is below; the organizers recommend registering to receive the Zoom link (you can ignore the registration deadline).
-
-https://hott-uf.github.io/2025/
-
-There is also the Working group on type theory meeting 17-18 April. You can choose a talk from this event instead.
-
-https://europroofnet.github.io/wg6-genoa/ *)
