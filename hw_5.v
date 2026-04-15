@@ -1,3 +1,4 @@
+Unset Universe Checking.
 Require Export UniMath.Foundations.All.
 Require Export UniMath.CategoryTheory.All.
 
