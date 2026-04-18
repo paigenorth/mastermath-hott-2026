@@ -1,0 +1,124 @@
+\documentclass{article}
+
+\usepackage{amsthm,amsfonts}
+\usepackage{mathpartir}
+\usepackage{mathtools}
+\usepackage{tikz-cd}
+\usepackage{hyperref,cleveref}
+\usepackage{color,soul}
+\usepackage{mathabx}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+
+% \theoremstyle{theorem}
+\newtheorem{theorem}[definition]{Theorem}
+\newtheorem{lemma}[definition]{Lemma}
+\newtheorem{corollary}[definition]{Corollary}
+\newtheorem{problem}[definition]{Problem}
+\newtheorem{exercise}[definition]{Exercise}
+\newtheorem{example}[definition]{Example}
+
+\newenvironment{construction}{
+\begin{proof}[Construction]}{
+\end{proof}}
+
+\newcommand{\types}{\mathcal T}
+\newcommand{\type}{\ \textsc{type}}
+\newcommand{\terms}{\mathcal S}
+% \newcommand{\contexts}{\mathcal C}
+% \newcommand{\context}{\textsc{ctx}}
+\newcommand{\T}{\mathbb T}
+\newcommand{\C}{\mathcal C}
+\newcommand{\D}{\mathcal D}
+\newcommand{\A}{\mathcal A}
+\newcommand{\M}{\mathcal M}
+\newcommand{\W}{\mathcal W}
+\newcommand{\F}{\mathcal F}
+\newcommand{\Set}{{\mathcal S}et}
+\newcommand{\syncat}[1]{\C [#1]}
+% \newcommand{\defeq}{\coloneqq}
+% \newcommand{\interp}[1]{\lceil #1 \rceil}
+\newcommand{\seq}{\doteq}
+% \newcommand{\lists}{\mathcal Lists}
+% \newcommand{\variables}{\mathcal Var}
+\newcommand{\Epsilon}{\mathrm E}
+\newcommand{\Zeta}{\mathrm Z}
+\newcommand{\mor}{\mathrm {mor}}
+\newcommand{\op}{\mathrm {op}}
+\newcommand{\grpd}{\mathcal G}
+\newcommand{\Id}{\mathtt {Id}}
+\newcommand{\Path}{\mathrm {Path} \ }
+
+\tikzset{pullbackcorner/.style={minimum size=1.2ex,path picture={
+      \draw[opacity=1,black,-,#1] (-0.5ex,-0.5ex) -- (0.5ex,-0.5ex) -- (0.5ex,0.5ex);%
+}}}
+
+\newcommand{\pullback}{\arrow[dr, phantom, "" {pullbackcorner} , very near start]}
+
+\title{HW 6 (Mastermath HoTT)}
+\author{Paige Randall North}
+
+\begin{document}
+
+\maketitle
+
+\noindent\textbf{Problem 1.} Define when a category with display maps models $\mathbb{N}$-types, and show that the syntactic category $\mathcal{C}(\mathbb{T})$ satisfies the definition, whenever the theory $\mathbb{T}$ has natural numbers.
+
+\hspace{1em}
+
+For the rest of this document, we work within a category $\mathcal C$ with all pullbacks.
+Recall the following definition.
+
+\begin{definition}
+  A \emph{path object} for an object $A$ is an object $\Path A$ equipped with the morphisms $r_A, \epsilon_A$ making the following diagram commute.
+  \[
+    \begin{tikzcd}
+      A \ar[dr, "r_A"] \ar[rr,"\Delta_A"]& & A \times A \\
+      & \Path A \ar[ur,"\epsilon_A"]
+    \end{tikzcd}
+  \]
+
+  Say that a choice of path objects is \emph{nice} when each $r_A$ has the left lifting property against each $\epsilon_B$.
+\end{definition}
+
+\noindent\textbf{Problem 2.} Show the following.
+
+\begin{lemma}
+  \label{lem:equivalence relation}
+  Nice path objects give reflexive and symmetric relations:
+
+  If there are classes of morphisms $\mathcal L, \mathcal R$ such that (1) each $r_A \in \mathcal L$, (2) each $\epsilon_B \in \mathcal R$, (3) $\mathcal R$ is stable under pullback and closed under composition, (4) $\mathcal L$ is stable under pullback along $\mathcal R$, (5) each morphism to the terminal object is in $\mathcal R$, and (6) $\mathcal L \boxslash \mathcal R$, then the path objects give a reflexive and symmetric (pseudo-)relation (see the \href{https://ncatlab.org/nlab/show/internal+pseudo-equivalence+relation}{nlab}).
+\end{lemma}
+
+\noindent\textbf{Problem 3.} Show that the relation defined in the previous lemma is transitive, hence an equivalence relation. Hint: compare with the syntactical proof of transitivity.
+
+\hspace{1em}
+
+\noindent\textbf{Problem 4.} Show the following.
+
+\begin{lemma}
+  \label{lem:factorization}
+  Consider a weak factorization system $(\mathcal L, \mathcal R)$ on the category $\C$, and write the factorization of $f: X \to Y$ as $X \xrightarrow{\lambda_f} Mf \xrightarrow{\rho_f} Y$.
+  Then, $\mathcal L$ is the class of all maps $f: X \to Y$ for which the following lifting problem has a solution.
+  \[
+    \begin{tikzcd}
+      X \ar[r,"\lambda_f"] \ar[d,"f"] & Mf \ar[d,"\rho_f"]
+      \\
+      Y \ar[r,equal] & Y
+    \end{tikzcd}
+    \tag{$*$}
+  \]
+
+  Dually, $\mathcal R$ is the class of all maps $f: X \to Y$ for which the following lifting problem has a solution.
+  \[
+    \begin{tikzcd}
+      X \ar[r,equal] \ar[d,"\lambda_f"] & X \ar[d,"f"]
+      \\
+      Mf \ar[r,"\rho_f"] & Y
+    \end{tikzcd}
+    \tag{$**$}
+  \]
+\end{lemma}
+
+\end{document}
