@@ -1,0 +1,138 @@
+\documentclass{article}
+
+\usepackage{amsthm,amsfonts}
+\usepackage{mathpartir}
+\usepackage{mathtools}
+\usepackage{tikz-cd}
+\usepackage{hyperref,cleveref}
+\usepackage{color,soul}
+\usepackage{mathabx}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+
+% \theoremstyle{theorem}
+\newtheorem{theorem}[definition]{Theorem}
+\newtheorem{lemma}[definition]{Lemma}
+\newtheorem{corollary}[definition]{Corollary}
+\newtheorem{problem}[definition]{Problem}
+\newtheorem{exercise}[definition]{Exercise}
+\newtheorem{example}[definition]{Example}
+
+\newenvironment{construction}{
+\begin{proof}[Construction]}{
+\end{proof}}
+
+\newcommand{\types}{\mathcal T}
+\newcommand{\type}{\ \textsc{type}}
+\newcommand{\terms}{\mathcal S}
+% \newcommand{\contexts}{\mathcal C}
+% \newcommand{\context}{\textsc{ctx}}
+\newcommand{\T}{\mathbb T}
+\newcommand{\C}{\mathcal C}
+\newcommand{\D}{\mathcal D}
+\newcommand{\A}{\mathcal A}
+\newcommand{\M}{\mathcal M}
+\newcommand{\W}{\mathcal W}
+\newcommand{\F}{\mathcal F}
+\newcommand{\Set}{{\mathcal S}et}
+\newcommand{\syncat}[1]{\C [#1]}
+% \newcommand{\defeq}{\coloneqq}
+% \newcommand{\interp}[1]{\lceil #1 \rceil}
+\newcommand{\seq}{\doteq}
+% \newcommand{\lists}{\mathcal Lists}
+% \newcommand{\variables}{\mathcal Var}
+\newcommand{\Epsilon}{\mathrm E}
+\newcommand{\Zeta}{\mathrm Z}
+\newcommand{\mor}{\mathrm {mor}}
+\newcommand{\op}{\mathrm {op}}
+\newcommand{\grpd}{\mathcal G}
+\newcommand{\Id}{\mathtt {Id}}
+\newcommand{\Path}{\mathrm {Path} \ }
+
+\tikzset{pullbackcorner/.style={minimum size=1.2ex,path picture={
+      \draw[opacity=1,black,-,#1] (-0.5ex,-0.5ex) -- (0.5ex,-0.5ex) -- (0.5ex,0.5ex);%
+}}}
+
+\newcommand{\pullback}{\arrow[dr, phantom, "" {pullbackcorner} , very near start]}
+
+\title{HW 7 (Mastermath HoTT)}
+\author{Paige Randall North}
+
+\begin{document}
+
+\maketitle
+
+\noindent\textbf{Problem 1.} Pullbacks.
+
+\begin{enumerate}
+  \item[(a)] (Pullback pasting lemma.) Consider a diagram of the following form in a category $\C$.
+    \[
+      \begin{tikzcd}
+        \bullet \ar[r] \ar[d] & \bullet \ar[r] \ar[d] & \bullet \ar[d] \\
+        \bullet \ar[r] & \bullet \ar[r] & \bullet
+      \end{tikzcd}
+    \]
+    Suppose the right square is a pullback. Show that the outer rectangle is a pullback if and only if the left square is a pullback.
+
+  \item[(b)] (Sections from diagonals.) Consider a pullback square
+    \[
+      \begin{tikzcd}
+        P \ar[r,"g"] \ar[d,"f"] \pullback & B \ar[d,"h"] \\
+        A \ar[r,"k"] & C
+      \end{tikzcd}
+    \]
+    in a category $\C$. Show that there is a bijection between sections of $f$ (i.e.\ morphisms $s : A \to P$ with $f s = 1_A$) and diagonals of the square (i.e.\ morphisms $d : A \to B$ with $h d = k$).
+
+  \item[(c)] Let $\C$ be a category with a terminal object $*$ and binary products. Show that for any object $A$ of $\C$, the following square is a pullback.
+    \[
+      \begin{tikzcd}
+        A \times A \ar[r,"\pi_1"] \ar[d,"\pi_0"] & A \ar[d,"!_A"] \\
+        A \ar[r,"!_A"] & *
+      \end{tikzcd}
+    \]
+
+  \item[(d)] Let $\C$ be a category with binary products. Show that for any morphism $f : X \to Y$ in $\C$, the following square is a pullback.
+    \[
+      \begin{tikzcd}
+        X \times Y \ar[r,"f \times 1_Y"] \ar[d,"\pi_0"] & Y \times Y \ar[d,"\pi_0"] \\
+        X \ar[r,"f"] & Y
+      \end{tikzcd}
+    \]
+\end{enumerate}
+
+\hspace{1em}
+
+Recall the following definition.
+\begin{definition}
+  Given a choice of path object $\Path A$ for each object $A$, we can produce a \emph{mapping path space} factorization on the category.
+
+  We take a morphism $f: X \to Y$ to the following factorization
+  \[
+    \begin{tikzcd}
+      X \ar[r,"\lambda_f"] & X \times_\bullet \Path Y \ar[r,"\epsilon_f"] & Y
+    \end{tikzcd}
+  \]
+  where $X \times_\bullet \Path Y$ is the following pullback
+  \[
+    \begin{tikzcd}
+      X \times_\bullet \Path Y \ar[r," "] \ar[d," "] \pullback & \Path Y \ar[d,"\pi_0 \epsilon "]
+      \\
+      X \ar[r,"f "] & Y
+    \end{tikzcd}
+  \]
+  The map $\epsilon_f$ is given by projecting to $\Path Y$ and then taking $\pi_1 \epsilon$. The map $\lambda_f$ is induced by $1_X$ and $r_Y f$.
+\end{definition}
+
+\noindent\textbf{Problem 2.} (The right component of the mapping path space factorization is a display map.)
+Suppose that $\C$ is a clan (Def. 2.7 in the notes) with a choice of path objects for each object. Show that $\epsilon_f$ is in $\D$. (Hint: Use Problem 1 (a), (c) and (d))
+
+\hspace{1em}
+
+\noindent\textbf{Problem 3.} (wfs induces a clan on the fibrant objects.) Consider a weak factorization system $(\mathcal{L}, \mathcal{R})$ on a category $\C$ with finite limits. Let $\C_{\mathcal{F}}$ denote the full subcategory of $\C$ spanned by the objects $X$ such that the unique map $X \to *$ is in $\mathcal{R}$. Show that:
+\begin{enumerate}
+  \item[(i)] The wfs $(\mathcal{L}, \mathcal{R})$ induces a wfs $(\mathcal{L}_{\mathcal{F}}, \mathcal{R}_{\mathcal{F}})$ on $\C_{\mathcal{F}}$.
+  \item[(ii)] $(\C_{\mathcal{F}}, \mathcal{R}_{\mathcal{F}})$ is a clan.
+\end{enumerate}
+
+\end{document}
